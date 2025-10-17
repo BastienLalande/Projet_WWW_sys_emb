@@ -4,6 +4,7 @@
 #include <Adafruit_BME280.h>
 #include <SoftwareSerial.h>
 #include <LedManager.h>
+#include <fileManager.h>
 
 // --- Définition des broches ---
 #define  BTN_ROUGE  2
@@ -71,6 +72,14 @@ void setup() {
   Serial.begin(9600);
   gpsSerial.begin(9600);
   ledManager.Init_Led();
+  init_SD();
+
+  /*
+  wrightFile("test.txt","test 3");
+  readFile("test.txt");
+  removeFile("test.txt");
+  printRoot();
+  */
 
   if (!bme.begin(0x76)) {
     Serial.println("Erreur : capteur BME280 non détecté !");
