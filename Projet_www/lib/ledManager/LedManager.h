@@ -34,6 +34,10 @@ public:
     void clear();
     void update();
 
+    // === Nouveau ===
+    void setModeColor(uint8_t r, uint8_t g, uint8_t b);
+    void restoreModeColor();
+
 private:
     ChainableLED led;
     ErrorCode current_error;
@@ -41,6 +45,9 @@ private:
     unsigned long last_update_time;
     uint8_t cycles_done;
     static constexpr uint8_t MAX_CYCLES = 2;
+
+    // Sauvegarde de la couleur du mode courant
+    uint8_t mode_r, mode_g, mode_b;
 
     static const LedPattern error_patterns[ERROR_COUNT];
 };

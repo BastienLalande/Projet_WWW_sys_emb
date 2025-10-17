@@ -15,24 +15,34 @@ LedManager::LedManager(uint8_t dataPin, uint8_t clockPin, uint8_t ledCount)
       current_error((ErrorCode)-1),
       showing_first_color(true),
       last_update_time(0),
-      cycles_done(0)
-{}
+      cycles_done(0),
+      mode_r(0), mode_g(0), mode_b(0) {}
 
 void LedManager::Init_Led() {
     setColor(0, 0, 0);
 }
 
-
 inline void LedManager::setColor(uint8_t r, uint8_t g, uint8_t b) {
     led.setColorRGB(0, r, g, b);
 }
-
 
 inline bool LedManager::isBusy() const {
     return current_error != (ErrorCode)-1;
 }
 
+// === Nouveau ===
+void LedManager::setModeColor(uint8_t r, uint8_t g, uint8_t b) {
+    mode_r = r;
+    mode_g = g;
+    mode_b = b;
+    setColor(r, g, b);
+}
 
+void LedManager::restoreModeColor() {
+    setColor(mode_r, mode_g, mode_b);
+}
+
+// === Feedback d’erreur ===
 void LedManager::feedback(const ErrorCode error_id) {
     if (error_id >= ERROR_COUNT) return;
 
@@ -48,10 +58,8 @@ void LedManager::feedback(const ErrorCode error_id) {
     last_update_time = millis();
     cycles_done = 0;
 
-    // Lecture du pattern depuis la mémoire Flash
     LedPattern pattern;
     memcpy_P(&pattern, &error_patterns[error_id], sizeof(LedPattern));
-
     setColor(pattern.r1, pattern.g1, pattern.b1);
 
     Serial.print(F("[ERROR] Pattern "));
@@ -63,7 +71,7 @@ void LedManager::feedback(const ErrorCode error_id) {
 void LedManager::clear() {
     current_error = (ErrorCode)-1;
     cycles_done = 0;
-    Init_Led();
+    restoreModeColor();  // <-- Revenir automatiquement à la couleur du mode
 }
 
 // === Mise à jour du pattern ===
@@ -90,7 +98,7 @@ void LedManager::update() {
             showing_first_color = true;
             last_update_time = now;
             if (++cycles_done >= MAX_CYCLES)
-                clear();
+                clear(); // retour à la couleur du mode ici
         }
     }
 }
