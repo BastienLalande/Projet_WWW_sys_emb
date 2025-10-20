@@ -27,7 +27,7 @@ public:
 private:
   Adafruit_BME280 bme;
   SoftwareSerial gpsSerial;
-  LedManager& ledManager;
+  LedManager &ledManager;
   uint8_t pinLum;
   bool bmeOK;
 
