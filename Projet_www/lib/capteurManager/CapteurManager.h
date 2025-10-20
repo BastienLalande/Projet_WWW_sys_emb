@@ -1,4 +1,3 @@
-#pragma once
 #include <Arduino.h>
 #include <Adafruit_BME280.h>
 #include <SoftwareSerial.h>

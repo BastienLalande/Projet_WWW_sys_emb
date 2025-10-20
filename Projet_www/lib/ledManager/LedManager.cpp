@@ -27,7 +27,7 @@ inline void LedManager::setColor(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 inline bool LedManager::isBusy() const {
-    return current_error != (ErrorCode)-1;
+    return current_error != (ErrorCode)-1; // return true if current_error != -1
 }
 
 // === Nouveau ===
@@ -58,9 +58,9 @@ void LedManager::feedback(const ErrorCode error_id) {
     last_update_time = millis();
     cycles_done = 0;
 
-    LedPattern pattern;
-    memcpy_P(&pattern, &error_patterns[error_id], sizeof(LedPattern));
-    setColor(pattern.r1, pattern.g1, pattern.b1);
+    LedPattern *pattern;
+    memcpy_P(pattern, &error_patterns[error_id], sizeof(LedPattern));
+    setColor(pattern->r1, pattern->g1, pattern->b1);
 
     Serial.print(F("[ERROR] Pattern "));
     Serial.print(error_id);
@@ -78,27 +78,30 @@ void LedManager::clear() {
 void LedManager::update() {
     if (!isBusy()) return;
 
-    LedPattern pattern;
-    memcpy_P(&pattern, &error_patterns[current_error], sizeof(LedPattern));
+    LedPattern *pattern;
+    memcpy_P(pattern, &error_patterns[current_error], sizeof(LedPattern));
 
     const unsigned long now = millis();
-    const float invFreq = 1000.0f / pattern.frequency;
-    const float t1 = invFreq / (1.0f + pattern.ratio);
-    const float t2 = t1 * pattern.ratio;
+    const float invFreq = 1000.0f / pattern->frequency;
+    const float t1 = invFreq / (1.0f + pattern->ratio);
+    const float t2 = t1 * pattern->ratio;
 
-    if (showing_first_color) {
-        if (now - last_update_time >= (unsigned long)t1) {
-            setColor(pattern.r2, pattern.g2, pattern.b2);
+    if (showing_first_color) 
+    {
+        if (now - last_update_time >= (unsigned long)t1) 
+        {
+            setColor(pattern->r2, pattern->g2, pattern->b2);
             showing_first_color = false;
             last_update_time = now;
         }
-    } else {
-        if (now - last_update_time >= (unsigned long)t2) {
-            setColor(pattern.r1, pattern.g1, pattern.b1);
+    } else 
+    {
+        if (now - last_update_time >= (unsigned long)t2) 
+        {
+            setColor(pattern->r1, pattern->g1, pattern->b1);
             showing_first_color = true;
             last_update_time = now;
-            if (++cycles_done >= MAX_CYCLES)
-                clear(); // retour à la couleur du mode ici
+            if (++cycles_done >= MAX_CYCLES) clear(); // retour à la couleur du mode ici
         }
     }
 }

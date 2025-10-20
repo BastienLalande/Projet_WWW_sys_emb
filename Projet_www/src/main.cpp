@@ -1,5 +1,3 @@
-#include <Wire.h>
-#include "DS1307.h"
 #include <LedManager.h>
 #include "CapteurManager.h"
 
@@ -9,7 +7,6 @@
 LedManager ledManager(7, 8, 1);
 CapteurManager capteurs(4, 5, A0, ledManager);
 
-// --- Modes de fonctionnement ---
 enum Mode : uint8_t {
   MODE_ETEINT,
   MODE_STANDARD,
@@ -18,7 +15,7 @@ enum Mode : uint8_t {
   MODE_ECO
 };
 
-// --- Structure d’affichage des modes ---
+
 struct ModeInfo {
   uint8_t r, g, b;
   const char* msg;
@@ -32,7 +29,7 @@ const ModeInfo modeInfo[] = {
   {0, 0, 255, "Mode Économique actif"}
 };
 
-// --- Variables globales ---
+
 Mode mode = MODE_ETEINT;
 Mode previousMode = MODE_STANDARD;
 unsigned long timerRougeStart = 0, timerVertStart = 0;
@@ -46,13 +43,13 @@ volatile unsigned int secondesData = 0;
 const unsigned int TEMPS_RETOUR_AUTO_CONFIG = 1800;
 const unsigned int LOG_INTERVAL = 10;
 
-// --- Fonctions prototypes ---
+
 void initPins();
 void setMode(Mode newMode);
 void handleModeChange();
-void handleLongPress(int pin, unsigned long &timerStart, bool &heldDone, void (*callback)());
 void handleDataAcquisition();
 void configTimer1();
+void handleButtons();
 
 void setup() {
   Serial.begin(9600);
@@ -66,7 +63,7 @@ void setup() {
 
 void loop() {
   ledManager.update();
-  handleModeChange();
+  handleButtons();
 
   if (mode == MODE_ETEINT) {
     if (digitalRead(BTN_ROUGE) == LOW) setMode(MODE_CONFIG);
@@ -83,31 +80,44 @@ void loop() {
     handleDataAcquisition();
 }
 
-void handleModeChange() {
-  handleLongPress(BTN_ROUGE, timerRougeStart, rougeHeldDone, [](){
-    if (mode == MODE_MAINTENANCE) setMode(previousMode);
-    else { previousMode = mode; setMode(MODE_MAINTENANCE); }
-  });
-
-  handleLongPress(BTN_VERT, timerVertStart, vertHeldDone, [](){
-    if (mode == MODE_ECO) setMode(MODE_STANDARD);
-    else if (mode == MODE_STANDARD) setMode(MODE_ECO);
-  });
-}
-
-void handleLongPress(int pin, unsigned long &timerStart, bool &heldDone, void (*callback)()) {
+void handleButtons() {
   unsigned long now = millis();
-  if (digitalRead(pin) == LOW) {
-    if (timerStart == 0) timerStart = now;
-    if (!heldDone && (now - timerStart > 5000)) {
-      heldDone = true;
-      callback();
+
+  if (digitalRead(BTN_ROUGE) == LOW) {
+    if (timerRougeStart == 0) timerRougeStart = now;
+    if (!rougeHeldDone && now - timerRougeStart > 5000) 
+    {
+      rougeHeldDone = true;
+      if (mode == MODE_MAINTENANCE) setMode(previousMode);
+      else 
+      { 
+        previousMode = mode; 
+        setMode(MODE_MAINTENANCE); 
+      }
     }
-  } else {
-    timerStart = 0;
-    heldDone = false;
+  } else 
+  {
+    timerRougeStart = 0;
+    rougeHeldDone = false;
+  }
+
+  if (digitalRead(BTN_VERT) == LOW) 
+  {
+    if (timerVertStart == 0) timerVertStart = now;
+    if (!vertHeldDone && now - timerVertStart > 5000) 
+    {
+      vertHeldDone = true;
+      if (mode == MODE_ECO) setMode(MODE_STANDARD);
+      else if (mode == MODE_STANDARD) setMode(MODE_ECO);
+    }
+  } else 
+  {
+    timerVertStart = 0;
+    vertHeldDone = false;
   }
 }
+
+
 
 void setMode(Mode newMode) {
   mode = newMode;
