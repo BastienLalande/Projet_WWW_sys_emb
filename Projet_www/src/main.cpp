@@ -1,3 +1,5 @@
+#include <LedManager.h>
+#include "CapteurManager.h"
 #include "DS1307.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
@@ -16,16 +18,16 @@
   BME : A4-SDA et A5-SCL
 */
 
-// --- Définition des broches ---
-#define  BTN_ROUGE  2
-#define BTN_VERT  3
+#define BTN_ROUGE 2
+#define BTN_VERT 3
 
+LedManager ledManager(7, 8, 1);
+CapteurManager capteurs(4, 5, A0, ledManager);
 // --- Objets matériels ---
 LedManager ledManager(7, 8, 1); //datapin, clockpin, nombre de led
 SoftwareSerial gpsSerial(5, 6);
 Adafruit_BME280 bme;
 
-// --- Modes de fonctionnement ---
 enum Mode : uint8_t {
   MODE_ETEINT,
   MODE_STANDARD,
@@ -33,6 +35,7 @@ enum Mode : uint8_t {
   MODE_MAINTENANCE,
   MODE_ECO
 };
+
 
 struct ModeInfo {
   uint8_t r, g, b;
@@ -47,40 +50,31 @@ const ModeInfo modeInfo[] = {
   {0, 0, 255, "Mode Économique actif"}
 };
 
-// --- Variables globales ---
+
 Mode mode = MODE_ETEINT;
 Mode previousMode = MODE_STANDARD;
+unsigned long timerRougeStart = 0, timerVertStart = 0;
+bool rougeHeldDone = false, vertHeldDone = false;
 
-unsigned long modeStart = 0;
-unsigned long timer_rougeStart = 0;
-unsigned long timer_vertStart  = 0;
-bool rougeHeldActionDone = false;
-bool vertHeldActionDone  = false;
-
-volatile unsigned int secondesEcoulees = 0;
-volatile unsigned int secondesData = 0;
 volatile bool retourAutoFlag = false;
 volatile bool aquireDataFlag = false;
-volatile bool skipNextAcq = false;
+volatile unsigned int secondesEcoulees = 0;
+volatile unsigned int secondesData = 0;
 
 const unsigned int TEMPS_RETOUR_AUTO_CONFIG = 1800;
 const unsigned int LOG_INTERVAL = 10;
 
-// --- Prototypes ---
+
 void initPins();
 void setMode(Mode newMode);
 void handleModeChange();
-void handleLongPress(int pin, unsigned long &timerStart, bool &heldDone, void (*callback)());
 void handleDataAcquisition();
 void configTimer1();
-void aquireData();
-String Lecture_GPS();
+void handleButtons();
 
-// --- Initialisation ---
 void setup() {
-  initPins();
   Serial.begin(9600);
-  gpsSerial.begin(9600);
+  initPins();
   ledManager.Init_Led();
   init_SD();
 
@@ -96,75 +90,73 @@ void setup() {
   Serial.println("Système en veille - attendre appui bouton");
 }
 
-// --- Boucle principale ---
 void loop() {
   ledManager.update();
-  handleModeChange();
+  handleButtons();
 
   if (mode == MODE_ETEINT) {
-    if (digitalRead(BTN_ROUGE) == LOW) {
-      Serial.println("Appui sur ROUGE → démarrage en mode CONFIG");
-      setMode(MODE_CONFIG);
-    }
-    else if (digitalRead(BTN_VERT) == LOW) {
-      Serial.println("Appui sur VERT → démarrage en mode STANDARD");
-      setMode(MODE_STANDARD);
-    }
+    if (digitalRead(BTN_ROUGE) == LOW) setMode(MODE_CONFIG);
+    else if (digitalRead(BTN_VERT) == LOW) setMode(MODE_STANDARD);
     return;
   }
 
   if (retourAutoFlag) {
     retourAutoFlag = false;
-    Serial.println("Fin mode configuration -> retour Standard");
     setMode(MODE_STANDARD);
   }
 
-  if (aquireDataFlag && (mode != MODE_CONFIG && mode != MODE_ETEINT))
+  if (aquireDataFlag && mode != MODE_CONFIG && mode != MODE_ETEINT)
     handleDataAcquisition();
 }
 
-// --- Gestion des boutons longs ---
-void handleModeChange() {
-  handleLongPress(BTN_ROUGE, timer_rougeStart, rougeHeldActionDone, [](){
-    if (mode == MODE_MAINTENANCE) setMode(previousMode);
-    else { previousMode = mode; setMode(MODE_MAINTENANCE); }
-  });
-
-  handleLongPress(BTN_VERT, timer_vertStart, vertHeldActionDone, [](){
-    if (mode == MODE_ECO) setMode(MODE_STANDARD);
-    else if (mode == MODE_STANDARD) setMode(MODE_ECO);
-  });
-}
-
-void handleLongPress(int pin, unsigned long &timerStart, bool &heldDone, void (*callback)()) {
+void handleButtons() {
   unsigned long now = millis();
-  if (digitalRead(pin) == LOW) {
-    if (timerStart == 0) timerStart = now;
-    if (!heldDone && (now - timerStart > 5000)) {
-      heldDone = true;
-      callback();
+
+  if (digitalRead(BTN_ROUGE) == LOW) {
+    if (timerRougeStart == 0) timerRougeStart = now;
+    if (!rougeHeldDone && now - timerRougeStart > 5000) 
+    {
+      rougeHeldDone = true;
+      if (mode == MODE_MAINTENANCE) setMode(previousMode);
+      else 
+      { 
+        previousMode = mode; 
+        setMode(MODE_MAINTENANCE); 
+      }
     }
-  } else {
-    timerStart = 0;
-    heldDone = false;
+  } else 
+  {
+    timerRougeStart = 0;
+    rougeHeldDone = false;
+  }
+
+  if (digitalRead(BTN_VERT) == LOW) 
+  {
+    if (timerVertStart == 0) timerVertStart = now;
+    if (!vertHeldDone && now - timerVertStart > 5000) 
+    {
+      vertHeldDone = true;
+      if (mode == MODE_ECO) setMode(MODE_STANDARD);
+      else if (mode == MODE_STANDARD) setMode(MODE_ECO);
+    }
+  } else 
+  {
+    timerVertStart = 0;
+    vertHeldDone = false;
   }
 }
 
-// --- Changement de mode ---
+
+
 void setMode(Mode newMode) {
   mode = newMode;
-  modeStart = millis();
   secondesEcoulees = 0;
   secondesData = 0;
-
   const ModeInfo& info = modeInfo[newMode];
-  ledManager.setColor(info.r, info.g, info.b);
-  Serial.println(info.msg);
+  //ledManager.setColor(info.r, info.g, info.b);
+  ledManager.setModeColor(info.r, info.g, info.b);
 
-  if (newMode == MODE_MAINTENANCE) {
-    Serial.print("Retournera sur ");
-    Serial.println(previousMode == MODE_ECO ? "ECO" : "STANDARD");
-  }
+  Serial.println(info.msg);
 }
 
 void initPins() {
@@ -172,13 +164,10 @@ void initPins() {
   pinMode(BTN_VERT, INPUT_PULLUP);
 }
 
-// --- Gestion du timer ---
 void configTimer1() {
   noInterrupts();
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TCNT1  = 0;
-  OCR1A = 15624;               // 1 seconde à 16 MHz / 1024 prescaler
+  TCCR1A = 0; TCCR1B = 0; TCNT1 = 0;
+  OCR1A = 15624;
   TCCR1B |= (1 << WGM12);
   TCCR1B |= (1 << CS12) | (1 << CS10);
   TIMSK1 |= (1 << OCIE1A);
@@ -197,37 +186,19 @@ ISR(TIMER1_COMPA_vect) {
     int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) ? LOG_INTERVAL * 2 : LOG_INTERVAL;
     if (++secondesData >= wait_value) {
       secondesData = 0;
-      if (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) {
-        skipNextAcq = !skipNextAcq;
-        if (!skipNextAcq) aquireDataFlag = true;
-      } else {
-        aquireDataFlag = true;
-      }
+      aquireDataFlag = true;
     }
   }
 }
 
-// --- Acquisition des données ---
 void handleDataAcquisition() {
   aquireDataFlag = false;
-  Serial.println(mode == MODE_MAINTENANCE ? "data in serial port" : "data saved in SD card");
-  aquireData();
-}
+  SensorData data = capteurs.readSensors();
+  String csv = capteurs.dataToCSV(data);
+  String gps = capteurs.readGPS();
 
-void aquireData() {
-  int lightSensor = analogRead(A0);
-  Serial.println(Lecture_GPS());
-  Serial.print("Lumière : "); Serial.println(lightSensor);
-  Serial.print("Température : "); Serial.print(bme.readTemperature()); Serial.println(" °C");
-  Serial.print("Humidité : "); Serial.print(bme.readHumidity()); Serial.println(" %");
-  Serial.print("Pression : "); Serial.print(bme.readPressure() / 100.0F); Serial.println(" hPa");
-}
-
-// --- Lecture GPS ---
-String Lecture_GPS() {
-  while (gpsSerial.available()) {
-    String line = gpsSerial.readStringUntil('\n');
-    if (line.startsWith("$GPGGA")) return line;
-  }
-  return "No GPS data";
+  if (mode == MODE_MAINTENANCE)
+    Serial.println("Données (maintenance): " + csv + " | " + gps);
+  else
+    Serial.println("Données enregistrées: " + csv + " | " + gps);
 }
