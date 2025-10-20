@@ -1,8 +1,6 @@
 #ifndef SDMANAGER_H
 #define SDMANAGER_H
 
-#include <Arduino.h>
-
 void init_SD();
 
 // Écriture dans un fichier sur la carte SD

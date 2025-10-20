@@ -7,7 +7,6 @@ void init_SD() {
   if (!SD.begin(chipSelect)) {
     Serial.println(F("Initialization failed!"));
     Serial.println(F("Check: card inserted, wiring, chipSelect pin."));
-    while (true); // Stop execution
   }
   Serial.println(F("Initialization done."));
 }
@@ -34,7 +33,7 @@ void readFile(const char* filename) {
   }
 }
 
-void printDirectory(File dir, uint8_t numTabs) {
+void printDirectory(File dir, uint8_t numTabs) { // !!! fonction récursive peut remplir la pile si les répertoires sont très grand !!!
   while (true) {
     File entry = dir.openNextFile();
     if (!entry) break;
@@ -66,7 +65,7 @@ void removeFile(const char* filename) {
 /*
 Example d'usage:
   init_SD(); //necessaire pour utiliser la carte SD
-  writeFile("test.txt","test 3"); // si existant ajoute du contenu sinon créer le fichier
+  writeFile("test.txt","test ecriture SD"); // si existant ajoute du contenu sinon créer le fichier
   readFile("test.txt");
   removeFile("test.txt");
   printRoot();

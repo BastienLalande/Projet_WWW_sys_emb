@@ -1,4 +1,3 @@
-#include <Wire.h>
 #include "DS1307.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
@@ -6,13 +5,24 @@
 #include <LedManager.h>
 #include <fileManager.h>
 
+/*PINS
+  bouton rouge : 2
+  bouton vert : 3
+  led data : 7
+  led clock : 8
+  GPS : 5 et 6
+  carte SD : 4 (obligatoire)
+  RTC : I2C
+  BME : A4-SDA et A5-SCL
+*/
+
 // --- Définition des broches ---
 #define  BTN_ROUGE  2
 #define BTN_VERT  3
 
 // --- Objets matériels ---
-LedManager ledManager(7, 8, 1);
-SoftwareSerial gpsSerial(4, 5);
+LedManager ledManager(7, 8, 1); //datapin, clockpin, nombre de led
+SoftwareSerial gpsSerial(5, 6);
 Adafruit_BME280 bme;
 
 // --- Modes de fonctionnement ---
