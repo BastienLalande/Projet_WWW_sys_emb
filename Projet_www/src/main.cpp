@@ -74,12 +74,6 @@ void setup() {
   ledManager.Init_Led();
   init_SD();
 
-  /*
-  wrightFile("test.txt","test 3");
-  readFile("test.txt");
-  removeFile("test.txt");
-  printRoot();
-  */
 
   if (!bme.begin(0x76)) {
     Serial.println("Erreur : capteur BME280 non détecté !");

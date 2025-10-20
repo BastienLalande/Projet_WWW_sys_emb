@@ -6,7 +6,7 @@
 void init_SD();
 
 // Écriture dans un fichier sur la carte SD
-void wrightFile(const char* fileName, const char* data);
+void writeFile(const char* filename, const char* msg);
 
 // Lecture du contenu d’un fichier sur la carte SD
 void readFile(const char* fileName);
