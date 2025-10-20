@@ -1,11 +1,32 @@
 #include <LedManager.h>
 #include "CapteurManager.h"
+#include "DS1307.h"
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+#include <SoftwareSerial.h>
+#include <LedManager.h>
+#include <fileManager.h>
+
+/*PINS
+  bouton rouge : 2
+  bouton vert : 3
+  led data : 7
+  led clock : 8
+  GPS : 5 et 6
+  carte SD : 4 (obligatoire)
+  RTC : I2C
+  BME : A4-SDA et A5-SCL
+*/
 
 #define BTN_ROUGE 2
 #define BTN_VERT 3
 
 LedManager ledManager(7, 8, 1);
 CapteurManager capteurs(4, 5, A0, ledManager);
+// --- Objets matériels ---
+LedManager ledManager(7, 8, 1); //datapin, clockpin, nombre de led
+SoftwareSerial gpsSerial(5, 6);
+Adafruit_BME280 bme;
 
 enum Mode : uint8_t {
   MODE_ETEINT,
@@ -55,7 +76,15 @@ void setup() {
   Serial.begin(9600);
   initPins();
   ledManager.Init_Led();
-  capteurs.begin();
+  init_SD();
+
+
+  if (!bme.begin(0x76)) {
+    Serial.println("Erreur : capteur BME280 non détecté !");
+    ledManager.feedback(ERROR_SENSOR_ACCESS);
+    while (1) ledManager.update();
+  }
+
   configTimer1();
   setMode(MODE_ETEINT);
   Serial.println("Système en veille - attendre appui bouton");
