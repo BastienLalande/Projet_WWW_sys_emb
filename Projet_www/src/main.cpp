@@ -144,8 +144,7 @@ ISR(TIMER1_COMPA_vect) {
       retourAutoFlag = true;
     }
   } else {
-    int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO))
-                     ? LOG_INTERVAL * 2 : LOG_INTERVAL;
+    int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) ? LOG_INTERVAL * 2 : LOG_INTERVAL;
     if (++secondesData >= wait_value) {
       secondesData = 0;
       aquireDataFlag = true;
