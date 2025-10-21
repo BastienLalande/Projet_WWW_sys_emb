@@ -1,20 +1,22 @@
 #include <SD.h>
 #include <clockManager.h>
 #include <ConfigManager.h>
-#include <Wire.h>
 
 #define CHIPSELECT 4
 
-long maxFileSize = configParams.FILE_MAX_SIZE;
+unsigned long maxFileSize = configParams.FILE_MAX_SIZE;
 
-void init_SD() {
+bool init_SD() {
   Serial.print(F("Initializing SD card..."));
   if (!SD.begin(CHIPSELECT)) {
-    Serial.println(F("Initialization failed!"));
+    Serial.println(F(" failed"));
     Serial.println(F("Check: card inserted, wiring, chipSelect pin."));
+    return false;
   }
-  Serial.println(F("Initialization done."));
+  Serial.println(F(" done."));
+  return true;
 }
+
 
 void writeFile(const String file, const String msg) {
   File myFile = SD.open(file, FILE_WRITE);
@@ -122,7 +124,7 @@ void saveData(const String data){
   {
     String f = date+F("_")+String(i)+F(".log");
     File myFile = SD.open(f);
-    if (myFile.size()+(sizeof(data)/sizeof(data[0]))<=maxFileSize){
+    if (myFile.size()+data.length()<=maxFileSize){
       writeFile(f,data);
       break;
     }

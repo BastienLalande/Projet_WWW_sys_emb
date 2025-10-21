@@ -1,10 +1,11 @@
 #include <Adafruit_BME280.h>
 #include <SoftwareSerial.h>
 #include <LedManager.h>
+#include <Wire.h>
 
 
-#define GPS_RX 4
-#define GPS_TX 3
+#define GPS_RX 7
+#define GPS_TX 8
 #define LUMINOSITY_PIN A0
 
 // --- Objets globaux ---
@@ -28,7 +29,7 @@ struct SensorData {
   float temperature;
   float humidity;
   float pressure;
-  int luminosity;
+  unsigned int luminosity;
   bool tempError;
   bool hygrError;
   bool pressError;
@@ -37,14 +38,16 @@ struct SensorData {
 
 bool init_capteur() {
   gpsSerial.begin(9600);
-  while (!gpsSerial){;}
+  Wire.begin();
   bmeOK = bme.begin(0x76);
   if (!bmeOK) {
     Serial.println(F("Erreur : capteur BME280 non détecté !"));
     Led_Feedback(ERROR_SENSOR_ACCESS);
     return false;
   }
+
   pinMode(LUMINOSITY_PIN, INPUT);
+  gpsSerial.begin(9600);
   Serial.println(F("CapteurManager prêt"));
   return true;
 }

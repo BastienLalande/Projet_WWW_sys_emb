@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-void init_SD();
+bool init_SD();
 
 // Écriture dans un fichier sur la carte SD
 void writeFile(const String filename, const String msg);

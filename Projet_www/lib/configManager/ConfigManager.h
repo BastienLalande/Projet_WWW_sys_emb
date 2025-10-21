@@ -2,7 +2,6 @@
 #define CONFIG_MANAGER_H
 
 #include <Arduino.h>
-#include <EEPROM.h>
 #include <avr/pgmspace.h>
 
 // --- Structure des paramètres ---

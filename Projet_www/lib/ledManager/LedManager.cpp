@@ -1,7 +1,7 @@
 #include "LedManager.h"
 #include <avr/pgmspace.h>
 
-static ChainableLED led(7, 8, 1); // valeurs par défaut
+static ChainableLED led(5, 6, 1); // valeurs par défaut
 static ErrorCode current_error = (ErrorCode)-1;
 static bool showing_first_color = true;
 static unsigned long last_update_time = 0;

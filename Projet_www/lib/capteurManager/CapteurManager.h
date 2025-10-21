@@ -8,7 +8,7 @@ struct SensorData {
   float temperature;
   float humidity;
   float pressure;
-  int luminosity;
+  unsigned int luminosity;
   bool tempError;
   bool hygrError;
   bool pressError;
@@ -24,7 +24,7 @@ struct SensorParams {
 };
 
 // --- Déclarations des fonctions ---
-void init_capteur();
+bool init_capteur();
 SensorData readSensors();
 String readGPS();
 

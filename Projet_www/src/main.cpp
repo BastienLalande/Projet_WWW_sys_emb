@@ -3,6 +3,7 @@
 #include <ConfigManager.h>
 #include <CapteurManager.h>
 #include <fileManager.h>
+#include <Wire.h>
 
 #define BTN_ROUGE 2
 #define BTN_VERT 3
@@ -54,15 +55,17 @@ void handleButtons();
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial){;}
   initPins();
   Led_Init();
-  //init_capteur();
-  init_SD();
+  init_capteur();
+  //init_SD();
   ConfigManager_init();
   configTimer1();
   setMode(MODE_ETEINT);
-  Serial.println("Système en veille - attendre appui bouton");
+  Serial.println(F("Système en veille - attendre appui bouton"));
+
+  Serial.print("SDA: "); Serial.println(digitalRead(SDA));
+  Serial.print("SCL: "); Serial.println(digitalRead(SCL));
 }
 
 void loop() {
@@ -164,7 +167,7 @@ ISR(TIMER1_COMPA_vect) {
       retourAutoFlag = true;
     }
   } else {
-    int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) ? LOG_INTERVAL * 2 : LOG_INTERVAL;
+    unsigned int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) ? LOG_INTERVAL * 2 : LOG_INTERVAL;
     if (++secondesData >= wait_value) {
       secondesData = 0;
       aquireDataFlag = true;
@@ -176,9 +179,10 @@ void handleDataAcquisition() {
   aquireDataFlag = false;
   SensorData data = readSensors();
 
-  if (mode == MODE_MAINTENANCE)
+  if (mode == MODE_MAINTENANCE){
     Serial.println("Données (maintenance): ");
-  else
+  }else{
     Serial.println("Données enregistrées: "+ String(data.humidity));
     printRoot();
+  }
 }
