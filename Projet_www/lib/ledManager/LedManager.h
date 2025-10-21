@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <ChainableLED.h>
 
+// === Types ===
 typedef struct {
     uint8_t r1, g1, b1;
     uint8_t r2, g2, b2;
@@ -21,34 +22,14 @@ typedef enum : uint8_t {
     ERROR_COUNT
 } ErrorCode;
 
-class LedManager {
-public:
-    LedManager(uint8_t dataPin, uint8_t clockPin, uint8_t ledCount = 1);
-
-    void Init_Led();
-
-    inline void setColor(uint8_t r, uint8_t g, uint8_t b);
-    inline bool isBusy() const;
-
-    void feedback(const ErrorCode error_id);
-    void clear();
-    void update();
-
-    // === Nouveau ===
-    void setModeColor(uint8_t r, uint8_t g, uint8_t b);
-    void restoreModeColor();
-
-private:
-    ChainableLED led;
-    ErrorCode current_error;
-    bool showing_first_color;
-    unsigned long last_update_time;
-    uint8_t cycles_done;
-    const static uint8_t MAX_CYCLES = 2;
-
-    uint8_t mode_r, mode_g, mode_b;
-
-    static const LedPattern error_patterns[ERROR_COUNT];
-};
+// === Fonctions publiques ===
+void Led_Init(uint8_t dataPin = 7, uint8_t clockPin = 8, uint8_t ledCount = 1);
+void Led_SetColor(uint8_t r, uint8_t g, uint8_t b);
+void Led_SetModeColor(uint8_t r, uint8_t g, uint8_t b);
+void Led_RestoreModeColor();
+void Led_Feedback(ErrorCode error_id);
+void Led_Clear();
+void Led_Update();
+bool Led_IsBusy();
 
 #endif
