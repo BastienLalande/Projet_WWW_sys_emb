@@ -56,7 +56,7 @@ void printDirectory(File dir, uint8_t numTabs) { // !!! fonction récursive peut
 }
 
 void printRoot() {
-  File root = SD.open("/");
+  File root = SD.open(F("/"));
   printDirectory(root, 0);
   root.close();
 }
@@ -118,7 +118,7 @@ void saveData(const String data){
   String date = getAAMMJJ();
   for (unsigned char i = 0; i < 9; i++)
   {
-    String f = date+"_"+String(i)+".log";
+    String f = date+F("_")+String(i)+F(".log");
     File myFile = SD.open(f);
     if (myFile.size()+(sizeof(data)/sizeof(data[0]))<=maxFileSize){
       writeFile(f,data);
