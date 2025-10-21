@@ -12,11 +12,21 @@ Parametres params;
 
 // --- Valeurs par défaut en mémoire flash ---
 const Parametres defaultParams PROGMEM = {
-  10, 4096, 30,
-  1, 255, 768,
-  1, -10, 60,
-  1, 0, 50,
-  1, 850, 1080
+  10, //LOG_INTERVAL
+  4096, //FILE_MAX_SIZE
+  30, //TIMEOUT
+  1, //LUMIN
+  255, //LUMIN_LOW
+  768, //LUMIN_HIGH
+  1, //TEMP_AIR
+  -10, //MIN_TEMP_AIR
+  60, //MAX_TEMP_AIR
+  1, //HYGR
+  0, //HYGR_MINT
+  50, //HYGR_MAXT
+  1, //PRESSURE
+  850, //PRESSURE_MIN
+  1080 //PRESSURE_MAX
 };
 
 // --- Déclarations internes ---

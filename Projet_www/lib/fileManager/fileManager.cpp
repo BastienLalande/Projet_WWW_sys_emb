@@ -1,9 +1,10 @@
 #include <SD.h>
 #include <clockManager.h>
+#include <ConfigManager.h>
 
 #define CHIPSELECT 4
 
-long maxFileSize = 4096;
+long maxFileSize = params.FILE_MAX_SIZE;
 
 void init_SD() {
   Serial.print(F("Initializing SD card..."));
