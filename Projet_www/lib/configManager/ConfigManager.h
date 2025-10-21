@@ -29,7 +29,7 @@ typedef struct {
 } Parametres;
 
 // --- Déclaration de la variable globale ---
-extern Parametres params;
+extern Parametres configParams;
 
 // --- Fonctions publiques ---
 void ConfigManager_init();
