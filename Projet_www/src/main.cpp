@@ -6,7 +6,7 @@
 #define BTN_VERT 3
 
 LedManager ledManager(7, 8, 1);
-CapteurManager capteurs(4, 5, A0, ledManager);
+CapteurManager capteurs(5/*GPS RX*/, 6/*GPS TX*/, A0, ledManager);
 
 enum Mode : uint8_t {
   MODE_ETEINT,
