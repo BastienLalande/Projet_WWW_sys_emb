@@ -1,12 +1,13 @@
 #include <LedManager.h>
 #include "CapteurManager.h"
 #include <ConfigManager.h>
+#include <CapteurManager.h>
+#include <fileManager.h>
 
 #define BTN_ROUGE 2
 #define BTN_VERT 3
 
 LedManager ledManager(7, 8, 1);
-CapteurManager capteurs(5/*GPS RX*/, 6/*GPS TX*/, A0, ledManager);
 
 enum Mode : uint8_t {
   MODE_ETEINT,
@@ -54,9 +55,11 @@ void handleButtons();
 
 void setup() {
   Serial.begin(9600);
+  while (!Serial){;}
   initPins();
   ledManager.Init_Led();
-  capteurs.begin();
+  //init_capteur();
+  init_SD();
   ConfigManager_init();
   configTimer1();
   setMode(MODE_ETEINT);
@@ -172,12 +175,11 @@ ISR(TIMER1_COMPA_vect) {
 
 void handleDataAcquisition() {
   aquireDataFlag = false;
-  SensorData data = capteurs.readSensors();
-  String csv = capteurs.dataToCSV(data);
-  String gps = capteurs.readGPS();
+  SensorData data = readSensors();
 
   if (mode == MODE_MAINTENANCE)
-    Serial.println("Données (maintenance): " + csv + " | " + gps);
+    Serial.println("Données (maintenance): ");
   else
-    Serial.println("Données enregistrées: " + csv + " | " + gps);
+    Serial.println("Données enregistrées: "+ String(data.humidity));
+    printRoot();
 }

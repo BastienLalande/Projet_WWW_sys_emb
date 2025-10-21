@@ -1,5 +1,6 @@
 #include <SD.h>
 #include <clockManager.h>
+#include <Wire.h>
 
 #define CHIPSELECT 4
 
