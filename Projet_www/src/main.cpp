@@ -1,5 +1,6 @@
 #include <LedManager.h>
 #include "CapteurManager.h"
+#include <ConfigManager.h>
 
 #define BTN_ROUGE 2
 #define BTN_VERT 3
@@ -56,6 +57,7 @@ void setup() {
   initPins();
   ledManager.Init_Led();
   capteurs.begin();
+  ConfigManager_init();
   configTimer1();
   setMode(MODE_ETEINT);
   Serial.println("Système en veille - attendre appui bouton");
@@ -71,10 +73,16 @@ void loop() {
     return;
   }
 
-  if (retourAutoFlag) {
-    retourAutoFlag = false;
-    setMode(MODE_STANDARD);
+  if(mode == MODE_CONFIG)
+  {
+    ConfigManager_loop();
+    if (retourAutoFlag) {
+      retourAutoFlag = false;
+      setMode(MODE_STANDARD);
+    }
+
   }
+
 
   if (aquireDataFlag && mode != MODE_CONFIG && mode != MODE_ETEINT)
     handleDataAcquisition();
