@@ -7,7 +7,6 @@
 #define BTN_ROUGE 2
 #define BTN_VERT 3
 
-LedManager ledManager(7, 8, 1);
 
 enum Mode : uint8_t {
   MODE_ETEINT,
@@ -57,7 +56,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial){;}
   initPins();
-  ledManager.Init_Led();
+  Led_Init();
   //init_capteur();
   init_SD();
   ConfigManager_init();
@@ -67,7 +66,7 @@ void setup() {
 }
 
 void loop() {
-  ledManager.update();
+  Led_Update();
   handleButtons();
 
   if (mode == MODE_ETEINT) {
@@ -136,7 +135,7 @@ void setMode(Mode newMode) {
   secondesData = 0;
   const ModeInfo& info = modeInfo[newMode];
   //ledManager.setColor(info.r, info.g, info.b);
-  ledManager.setModeColor(info.r, info.g, info.b);
+  Led_SetModeColor(info.r, info.g, info.b);
 
   Serial.println(info.msg);
 }

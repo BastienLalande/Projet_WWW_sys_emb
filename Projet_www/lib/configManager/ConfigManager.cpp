@@ -2,6 +2,7 @@
 #include <EEPROM.h>
 #include <stdlib.h>
 #include <string.h>
+#include <clockManager.h>
 
 #define CMD_BUFFER 64
 static char cmdBuffer[CMD_BUFFER];
@@ -101,6 +102,26 @@ static void traiterCommande(char *cmd) {
     else if (!strcasecmp(arg2, "PRESSURE")) { params.PRESSURE = val; ok = true; }
     else if (!strcasecmp(arg2, "PRESSURE_MIN")) { params.PRESSURE_MIN = val; ok = true; }
     else if (!strcasecmp(arg2, "PRESSURE_MAX")) { params.PRESSURE_MAX = val; ok = true; }
+    else if(!strcasecmp(arg2, "CLOCK"))
+    {
+      char *token1 = strtok(arg3,"-");
+      char *token2 = strtok(NULL,"-");
+      char *token3 = strtok(NULL,"-");
+      char *token4 = strtok(NULL,"-");
+      char *token5 = strtok(NULL,"-");
+      char *token6 = strtok(NULL,"-");
+      setupTime(
+        atoi(token1),
+        atoi(token2),
+        atoi(token3),
+        atoi(token4),
+        atoi(token5),
+        atoi(token6)
+      );
+
+      Serial.println(F("[INFO] Horloge mise à jour !"));
+      ok = true;
+    }
 
     if (ok) 
     {
