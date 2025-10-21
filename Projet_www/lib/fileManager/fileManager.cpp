@@ -1,18 +1,21 @@
 #include <SD.h>
+#include <clockManager.h>
 
-const int chipSelect = 4;
+#define CHIPSELECT 4
+
+long maxFileSize = 2000;
 
 void init_SD() {
   Serial.print(F("Initializing SD card..."));
-  if (!SD.begin(chipSelect)) {
+  if (!SD.begin(CHIPSELECT)) {
     Serial.println(F("Initialization failed!"));
     Serial.println(F("Check: card inserted, wiring, chipSelect pin."));
   }
   Serial.println(F("Initialization done."));
 }
 
-void writeFile(const char* filename, const char* msg) {
-  File myFile = SD.open(filename, FILE_WRITE);
+void writeFile(const String file, const String msg) {
+  File myFile = SD.open(file, FILE_WRITE);
   if (myFile) {
     myFile.println(msg);
     myFile.close();
@@ -21,8 +24,8 @@ void writeFile(const char* filename, const char* msg) {
   }
 }
 
-void readFile(const char* filename) {
-  File myFile = SD.open(filename);
+void readFile(const String file) {
+  File myFile = SD.open(file);
   if (myFile) {
     while (myFile.available()) {
       Serial.write(myFile.read());
@@ -58,8 +61,63 @@ void printRoot() {
   root.close();
 }
 
-void removeFile(const char* filename) {
-  SD.remove(filename);
+void createDirectory(const String dirName) {
+  if (SD.mkdir(dirName)) {
+    Serial.print(F("Directory created: "));
+    Serial.println(dirName);
+  } else {
+    Serial.print(F("Failed to create directory: "));
+    Serial.println(dirName);
+  }
+}
+
+void removeFile(const String dirName) {// !!! fonction récursive !!!
+  File dir = SD.open(dirName);
+  if (!dir) {
+    Serial.print(F("Directory not found: "));
+    Serial.println(dirName);
+    return;
+  }
+
+  if (!dir.isDirectory()) {
+    SD.remove(dirName);
+    dir.close();
+    return;
+  }
+
+  // Supprimer tous les fichiers et sous-répertoires
+  while (true) {
+    File entry = dir.openNextFile();
+    if (!entry) break;
+
+    String entryName = String(dirName) + "/" + entry.name();
+    if (entry.isDirectory()) {
+      entry.close();
+      removeFile(entryName); // Appel récursif
+    } else {
+      entry.close();
+      SD.remove(entryName);
+      Serial.print(F("File removed: "));
+      Serial.println(entryName);
+    }
+  }
+  dir.close();
+
+  // Supprimer le répertoire lui-même
+  if (SD.rmdir(dirName)) {
+    Serial.print(F("Directory removed: "));
+    Serial.println(dirName);
+  } else {
+    Serial.print(F("Failed to remove directory: "));
+    Serial.println(dirName);
+  }
+}
+
+
+void saveData(const String data){
+  String date = getAAMMJJ();
+
+  
 }
 
 /*

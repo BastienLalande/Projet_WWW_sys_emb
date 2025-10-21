@@ -1,16 +1,20 @@
 #ifndef SDMANAGER_H
 #define SDMANAGER_H
 
+#include <Arduino.h>
+
 void init_SD();
 
 // Écriture dans un fichier sur la carte SD
-void writeFile(const char* filename, const char* msg);
+void writeFile(const String filename, const String msg);
 
 // Lecture du contenu d’un fichier sur la carte SD
-void readFile(const char* fileName);
+void readFile(const String fileName);
 
 // suppression d'un fichier
-void removeFile(const char* fileName);
+void removeFile(const String fileName);
+
+void saveData(const String data);
 
 void printRoot();
 #endif // SDMANAGER_H
