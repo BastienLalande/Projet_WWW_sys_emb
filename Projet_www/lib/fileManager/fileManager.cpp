@@ -5,7 +5,7 @@
 
 #define CHIPSELECT 4
 
-long maxFileSize = params.FILE_MAX_SIZE;
+long maxFileSize = configParams.FILE_MAX_SIZE;
 
 void init_SD() {
   Serial.print(F("Initializing SD card..."));
