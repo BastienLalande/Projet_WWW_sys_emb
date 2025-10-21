@@ -17,12 +17,11 @@ void setupTime(
   clock.setTime();
 }
 
-String getAAMMJJ(){
+String getAAMMJJ() {
     clock.getTime();
-    return 
-        String(clock.year, DEC)+
-        String(clock.month, DEC)+
-        String(clock.dayOfMonth, DEC);
+    char buffer[6]; // 6 caractères
+    sprintf(buffer, "%02d%02d%02d", clock.year % 100, clock.month, clock.dayOfMonth);
+    return String(buffer);
 }
 
 void printTime() {

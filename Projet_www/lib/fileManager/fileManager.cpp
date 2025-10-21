@@ -3,7 +3,7 @@
 
 #define CHIPSELECT 4
 
-long maxFileSize = 2000;
+long maxFileSize = 4096;
 
 void init_SD() {
   Serial.print(F("Initializing SD card..."));
@@ -17,7 +17,7 @@ void init_SD() {
 void writeFile(const String file, const String msg) {
   File myFile = SD.open(file, FILE_WRITE);
   if (myFile) {
-    myFile.println(msg);
+    myFile.print(msg);
     myFile.close();
   } else {
     Serial.println(F("Error opening file for writing"));
@@ -116,8 +116,16 @@ void removeFile(const String dirName) {// !!! fonction récursive !!!
 
 void saveData(const String data){
   String date = getAAMMJJ();
-
-  
+  for (unsigned char i = 0; i < 9; i++)
+  {
+    String f = date+"_"+String(i)+".log";
+    File myFile = SD.open(f);
+    if (myFile.size()+(sizeof(data)/sizeof(data[0]))<=maxFileSize){
+      writeFile(f,data);
+      break;
+    }
+    myFile.close();
+  }
 }
 
 /*
