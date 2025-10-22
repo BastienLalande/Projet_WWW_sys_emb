@@ -1,20 +1,32 @@
-#ifndef SDMANAGER_H
-#define SDMANAGER_H
+#pragma once
+#ifndef SD_UTILS_H
+#define SD_UTILS_H
 
 #include <Arduino.h>
+#include <SD.h>
+
+#ifndef CHIPSELECT
+  #define CHIPSELECT 4
+#endif
+
+#ifndef SD_PATH_MAX
+  #define SD_PATH_MAX 64
+#endif
+
+#ifndef IO_BUF_SIZE
+  #define IO_BUF_SIZE 64
+#endif
 
 bool init_SD();
 
-// Écriture dans un fichier sur la carte SD
-void writeFile(const String filename, const String msg);
+bool writeFile(const char* path, const uint8_t* data, size_t len);
 
-// Lecture du contenu d’un fichier sur la carte SD
-void readFile(const String fileName);
+bool writeFile(const char* path, const char* msg);
 
-// suppression d'un fichier
-void removeFile(const String fileName);
+void readFile(const char* path);
 
-void saveData(const String data);
+void createDirectory(const char* dirName);
 
-void printRoot();
-#endif // SDMANAGER_H
+void saveData(const char* data);
+
+#endif // SD_UTILS_H

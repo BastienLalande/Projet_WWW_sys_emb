@@ -7,7 +7,7 @@
 // --- Structure des paramètres ---
 typedef struct {
   int LOG_INTERVAL;
-  int FILE_MAX_SIZE;
+  unsigned int FILE_MAX_SIZE;
   int TIMEOUT;
 
   int LUMIN;

@@ -119,7 +119,8 @@ static void traiterCommande(char *cmd) {
         atoi(token6)
       );
 
-      Serial.println(F("[INFO] Horloge mise à jour !"));
+      Serial.print(F("[INFO] Horloge mise à jour à :"));
+      printTime();
       ok = true;
     }
 

@@ -1,9 +1,9 @@
+#include <Arduino.h>
 #include <LedManager.h>
-#include "CapteurManager.h"
-#include <ConfigManager.h>
 #include <CapteurManager.h>
+#include <ConfigManager.h>
+#include <clockManager.h>
 #include <fileManager.h>
-#include <Wire.h>
 
 #define BTN_ROUGE 2
 #define BTN_VERT 3
@@ -48,7 +48,6 @@ const unsigned int LOG_INTERVAL = 10;
 
 void initPins();
 void setMode(Mode newMode);
-void handleModeChange();
 void handleDataAcquisition();
 void configTimer1();
 void handleButtons();
@@ -57,15 +56,12 @@ void setup() {
   Serial.begin(9600);
   initPins();
   LedManager_Init(5,6);
-  //init_capteur();
-  //init_SD();
   ConfigManager_init();
   configTimer1();
   setMode(MODE_ETEINT);
+  init_capteur();
+  //init_SD();
   Serial.println(F("Système en veille - attendre appui bouton"));
-
-  Serial.print("SDA: "); Serial.println(digitalRead(SDA));
-  Serial.print("SCL: "); Serial.println(digitalRead(SCL));
 }
 
 void loop() {
@@ -130,8 +126,6 @@ void handleButtons() {
   }
 }
 
-
-
 void setMode(Mode newMode) {
   mode = newMode;
   secondesEcoulees = 0;
@@ -177,12 +171,22 @@ ISR(TIMER1_COMPA_vect) {
 
 void handleDataAcquisition() {
   aquireDataFlag = false;
-  SensorData data = readSensors();
+  //SensorData data = readSensors();
 
   if (mode == MODE_MAINTENANCE){
     Serial.println("Données (maintenance): ");
   }else{
-    Serial.println("Données enregistrées: "+ String(data.humidity));
-    printRoot();
+  
+  Serial.println("Données enregistrées:");
+
+  
+  float lat, lon;
+  if (readGPS(lat, lon)) {
+    Serial.print(F("Lat: ")); Serial.print(lat, 6);
+    Serial.print(F("  Lon: ")); Serial.println(lon, 6);
+  }
+
+  //readFile("test.log");
+
   }
 }
