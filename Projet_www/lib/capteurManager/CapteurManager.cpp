@@ -42,7 +42,7 @@ bool init_capteur() {
   bmeOK = bme.begin(0x76);
   if (!bmeOK) {
     Serial.println(F("Erreur : capteur BME280 non détecté !"));
-    Led_Feedback(ERROR_SENSOR_ACCESS);
+    LedManager_Feedback(ERROR_SENSOR_ACCESS);
     return false;
   }
 
@@ -55,7 +55,7 @@ bool init_capteur() {
 SensorData readSensors() {
   SensorData d = {};
   if (!bmeOK) {
-    Led_Feedback(ERROR_SENSOR_ACCESS);
+    LedManager_Feedback(ERROR_SENSOR_ACCESS);
     return d;
   }
 
@@ -70,7 +70,7 @@ SensorData readSensors() {
   d.luminError = (d.luminosity < sensorParams.LUMIN_LOW || d.luminosity > sensorParams.LUMIN_HIGH);
 
   if (d.tempError || d.pressError)
-    Led_Feedback(ERROR_SENSOR_INCOHERENT);
+    LedManager_Feedback(ERROR_SENSOR_INCOHERENT);
 
   return d;
 }
@@ -80,6 +80,6 @@ String readGPS() {
     String line = gpsSerial.readStringUntil('\n');
     if (line.startsWith("$GPGGA")) return line;
   }
-  Led_Feedback(ERROR_GPS_ACCESS);
+  LedManager_Feedback(ERROR_GPS_ACCESS);
   return "No GPS data";
 }

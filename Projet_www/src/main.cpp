@@ -56,8 +56,8 @@ void handleButtons();
 void setup() {
   Serial.begin(9600);
   initPins();
-  Led_Init();
-  init_capteur();
+  LedManager_Init(5,6);
+  //init_capteur();
   //init_SD();
   ConfigManager_init();
   configTimer1();
@@ -69,7 +69,7 @@ void setup() {
 }
 
 void loop() {
-  Led_Update();
+  LedManager_Update();
   handleButtons();
 
   if (mode == MODE_ETEINT) {
@@ -138,7 +138,7 @@ void setMode(Mode newMode) {
   secondesData = 0;
   const ModeInfo& info = modeInfo[newMode];
   //ledManager.setColor(info.r, info.g, info.b);
-  Led_SetModeColor(info.r, info.g, info.b);
+  LedManager_SetModeColor(info.r, info.g, info.b);
 
   Serial.println(info.msg);
 }

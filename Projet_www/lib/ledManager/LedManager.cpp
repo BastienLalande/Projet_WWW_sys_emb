@@ -1,7 +1,20 @@
+// led manager .cpp
+
 #include "LedManager.h"
 #include <avr/pgmspace.h>
 
-static ChainableLED led(5, 6, 1); // valeurs par défaut
+// === Constantes ===
+static const LedPattern error_patterns[ERROR_COUNT] PROGMEM = {
+    {255, 0, 0,   0, 0, 255,     1, 1.0},   // RTC
+    {255, 0, 0,   255, 255, 0,   1.0, 1.0}, // GPS
+    {255, 0, 0,   0, 255, 0,     1.0, 1.0}, // Capteur accès
+    {255, 0, 0,   0, 255, 0,     1.0, 2.0}, // Capteur incohérent
+    {255, 0, 0,   255, 255, 255, 1.0, 1.0}, // SD pleine
+    {255, 0, 0,   255, 255, 255, 1.0, 2.0}  // SD accès
+};
+
+// === Variables globales ===
+static ChainableLED* led = nullptr;
 static ErrorCode current_error = (ErrorCode)-1;
 static bool showing_first_color = true;
 static unsigned long last_update_time = 0;
@@ -10,42 +23,44 @@ static const uint8_t MAX_CYCLES = 2;
 
 static uint8_t mode_r = 0, mode_g = 0, mode_b = 0;
 
-static const LedPattern error_patterns[ERROR_COUNT] PROGMEM = {
-    {255, 0, 0, 0, 0, 255, 1, 1.0},   // RTC
-    {255, 0, 0, 255, 255, 0, 1.0, 1.0}, // GPS
-    {255, 0, 0, 0, 255, 0, 1.0, 1.0}, // Capteur accès
-    {255, 0, 0, 0, 255, 0, 1.0, 2.0}, // Capteur incohérent
-    {255, 0, 0, 255, 255, 255, 1.0, 1.0}, // SD pleine
-    {255, 0, 0, 255, 255, 255, 1.0, 2.0}  // SD accès
-};
-
-void Led_Init(uint8_t dataPin, uint8_t clockPin, uint8_t ledCount) {
-    led = ChainableLED(dataPin, clockPin, ledCount);
-    Led_SetColor(0, 0, 0);
+// === Fonctions internes ===
+void LedManager_SetColor(uint8_t r, uint8_t g, uint8_t b) {
+    if (led) led->setColorRGB(0, r, g, b);
 }
 
-void Led_SetColor(uint8_t r, uint8_t g, uint8_t b) {
-    led.setColorRGB(0, r, g, b);
-}
-
-bool Led_IsBusy() {
+bool LedManager_IsBusy() {
     return current_error != (ErrorCode)-1;
 }
 
-void Led_SetModeColor(uint8_t r, uint8_t g, uint8_t b) {
+// === Initialisation ===
+void LedManager_Init(uint8_t dataPin, uint8_t clockPin, uint8_t ledCount) {
+    if (led) delete led;
+    led = new ChainableLED(dataPin, clockPin, ledCount);
+    LedManager_SetColor(0, 0, 0);
+}
+
+// === Mode couleur ===
+void LedManager_SetModeColor(uint8_t r, uint8_t g, uint8_t b) {
     mode_r = r;
     mode_g = g;
     mode_b = b;
-    Led_SetColor(r, g, b);
+    LedManager_SetColor(r, g, b);
 }
 
-void Led_RestoreModeColor() {
-    Led_SetColor(mode_r, mode_g, mode_b);
+void LedManager_RestoreModeColor() {
+    LedManager_SetColor(mode_r, mode_g, mode_b);
 }
 
-void Led_Feedback(ErrorCode error_id) {
+// === Feedback d’erreur ===
+void LedManager_Feedback(ErrorCode error_id) {
     if (error_id >= ERROR_COUNT) return;
-    if (Led_IsBusy()) return;
+
+    if (LedManager_IsBusy()) {
+        Serial.print(F("[INFO] Pattern déjà en cours ("));
+        Serial.print(current_error);
+        Serial.println(F("), ignoré"));
+        return;
+    }
 
     current_error = error_id;
     showing_first_color = true;
@@ -54,17 +69,23 @@ void Led_Feedback(ErrorCode error_id) {
 
     LedPattern pattern;
     memcpy_P(&pattern, &error_patterns[error_id], sizeof(LedPattern));
-    Led_SetColor(pattern.r1, pattern.g1, pattern.b1);
+    LedManager_SetColor(pattern.r1, pattern.g1, pattern.b1);
+
+    Serial.print(F("[ERROR] Pattern "));
+    Serial.print(error_id);
+    Serial.println(F(" activé"));
 }
 
-void Led_Clear() {
+// === Effacement du pattern ===
+void LedManager_Clear() {
     current_error = (ErrorCode)-1;
     cycles_done = 0;
-    Led_RestoreModeColor();
+    LedManager_RestoreModeColor();
 }
 
-void Led_Update() {
-    if (!Led_IsBusy()) return;
+// === Mise à jour ===
+void LedManager_Update() {
+    if (!LedManager_IsBusy()) return;
 
     LedPattern pattern;
     memcpy_P(&pattern, &error_patterns[current_error], sizeof(LedPattern));
@@ -76,16 +97,16 @@ void Led_Update() {
 
     if (showing_first_color) {
         if (now - last_update_time >= (unsigned long)t1) {
-            Led_SetColor(pattern.r2, pattern.g2, pattern.b2);
+            LedManager_SetColor(pattern.r2, pattern.g2, pattern.b2);
             showing_first_color = false;
             last_update_time = now;
         }
     } else {
         if (now - last_update_time >= (unsigned long)t2) {
-            Led_SetColor(pattern.r1, pattern.g1, pattern.b1);
+            LedManager_SetColor(pattern.r1, pattern.g1, pattern.b1);
             showing_first_color = true;
             last_update_time = now;
-            if (++cycles_done >= MAX_CYCLES) Led_Clear();
+            if (++cycles_done >= MAX_CYCLES) LedManager_Clear();
         }
     }
 }
