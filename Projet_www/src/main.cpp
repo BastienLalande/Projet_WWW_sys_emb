@@ -24,11 +24,11 @@ struct ModeInfo {
 };
 
 const ModeInfo modeInfo[] = {
-  {0, 0, 0,   "Mode Veille (LED éteinte)"},
+  {0, 0, 0,   "Mode Veille (LED eteinte)"},
   {0, 255, 0, "Mode Standard actif"},
   {255, 255, 0, "Mode Configuration actif (3 min max)"},
   {255, 165, 0, "Mode Maintenance actif"},
-  {0, 0, 255, "Mode Économique actif"}
+  {0, 0, 255, "Mode economique actif"}
 };
 
 
@@ -61,7 +61,7 @@ void setup() {
   setMode(MODE_ETEINT);
   init_capteur();
   //init_SD();
-  Serial.println(F("Système en veille - attendre appui bouton"));
+  Serial.println(F("Systeme en veille - attendre appui bouton"));
 }
 
 void loop() {
@@ -171,20 +171,26 @@ ISR(TIMER1_COMPA_vect) {
 
 void handleDataAcquisition() {
   aquireDataFlag = false;
-  //SensorData data = readSensors();
+  SensorData data = readSensors();
+  float lat, lon;
+  readGPS(lat, lon);
 
   if (mode == MODE_MAINTENANCE){
-    Serial.println("Données (maintenance): ");
-  }else{
-  
-  Serial.println("Données enregistrées:");
-
-  
-  float lat, lon;
-  if (readGPS(lat, lon)) {
+    String print_data = 
+      "| Temperature :  "+String(data.temperature)+"\n"+
+      "| Humidite :     "+String(data.humidity)+"\n"+
+      "| Luminosite :   "+String(data.luminosity)+"\n"+
+      "L Pression :     "+String(data.pressure)
+    ;
     Serial.print(F("Lat: ")); Serial.print(lat, 6);
     Serial.print(F("  Lon: ")); Serial.println(lon, 6);
-  }
+    Serial.println("Donnees (maintenance): \n" + print_data);
+  }else{
+  
+  Serial.println("Donnees enregistrees:");
+
+  
+  
 
   //readFile("test.log");
 

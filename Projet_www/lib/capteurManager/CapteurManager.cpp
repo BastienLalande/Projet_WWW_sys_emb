@@ -41,7 +41,7 @@ bool init_capteur() {
   Wire.begin();
   bmeOK = bme.begin(0x76);
   if (!bmeOK) {
-    Serial.println(F("Erreur : capteur BME280 non détecté !"));
+    Serial.println(F("Erreur : capteur BME280 non detecte !"));
     LedManager_Feedback(ERROR_SENSOR_ACCESS);
     return false;
   }
@@ -88,10 +88,12 @@ float convertToDecimal(String coord, String dir) {
 bool readGPS(float &lat, float &lon) {
   while (gpsSerial.available()) {
     String line = gpsSerial.readStringUntil('\n');
-    Serial.println(line);
+    //Serial.println(line);
     
     if (line.indexOf(F("$GPGGA"))!=-1 || line.indexOf(F("$GPRMC"))!=-1) {
-      // Découper la trame
+      if (line.indexOf(F("$GPGGA"))!=-1) line = line.substring(line.indexOf(F("$GPGGA")),line.length());
+      else line = line.substring(line.indexOf(F("$GPRMC")),line.length());
+      // Decouper la trame
       int index = 0;
       String fields[15];
       for (int i = 0; i < 15; i++) {
@@ -115,11 +117,11 @@ bool readGPS(float &lat, float &lon) {
       if (latStr.length() > 0 && lonStr.length() > 0) {
         lat = convertToDecimal(latStr, latDir);
         lon = convertToDecimal(lonStr, lonDir);
-        return true; // Succès
+        return true; // Succes
       }
     }
   }
 
   LedManager_Feedback(ERROR_GPS_ACCESS);
-  return false; // Échec
+  return false; // echec
 }

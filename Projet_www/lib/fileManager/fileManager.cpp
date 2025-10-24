@@ -2,9 +2,6 @@
 #include <clockManager.h>
 #include <ConfigManager.h>
 
-// ------------------------
-// Configuration
-// ------------------------
 #define CHIPSELECT   4
 #define SD_PATH_MAX 4096
 #define IO_BUF_SIZE 64
@@ -22,7 +19,7 @@ bool init_SD() {
 
 
 bool writeFile(const char* path, const uint8_t* data, size_t len) {
-  File f = SD.open(path, FILE_WRITE); // append si existe, sinon crée
+  File f = SD.open(path, FILE_WRITE); // append si existe, sinon cree
   if (!f) {
     Serial.println(F("Error opening file for writing"));
     return false;
@@ -95,8 +92,8 @@ void saveData(const char* data) {
 
 /*
 Exemples d’usage:
-  init_SD(); // nécessaire pour utiliser la carte SD
-  writeFile("test.txt", "test ecriture SD\n"); // append si existe, sinon création
+  init_SD(); // necessaire pour utiliser la carte SD
+  writeFile("test.txt", "test ecriture SD\n"); // append si existe, sinon creation
   readFile("test.txt");
   createDirectory("logs");
   saveData("Hello world\n");
