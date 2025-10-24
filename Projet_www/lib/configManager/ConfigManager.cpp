@@ -38,13 +38,12 @@ void ConfigManager_reset();
 
 // --- Initialisation ---
 void ConfigManager_init() {
-  Serial.begin(9600);
   ConfigManager_load();
   Serial.println(F("[INFO] Mode Configuration initializé"));
 }
 
 // --- Boucle principale ---
-void ConfigManager_loop() {
+void ConfigManager_Update() {
   while (Serial.available()) {
     char c = Serial.read();
 
@@ -110,6 +109,11 @@ static void traiterCommande(char *cmd) {
       char *token4 = strtok(NULL,"-");
       char *token5 = strtok(NULL,"-");
       char *token6 = strtok(NULL,"-");
+      if(!token1 || !token2 || !token3 || !token4 || !token5 || !token6)
+      {
+        Serial.println(F("[ERROR] Syntaxe: SET CLOCK <YYYY-MM-DD-HH-MM-SS>"));
+        return;
+      }
       setupTime(
         atoi(token1),
         atoi(token2),
@@ -120,6 +124,7 @@ static void traiterCommande(char *cmd) {
       );
 
       Serial.println(F("[INFO] Horloge mise à jour !"));
+      printTime();
       ok = true;
     }
 

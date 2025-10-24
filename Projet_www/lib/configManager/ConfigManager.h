@@ -34,7 +34,7 @@ extern Parametres configParams;
 void ConfigManager_init();
 void ConfigManager_loop();
 void ConfigManager_save();
-void ConfigManager_load();
+void ConfigManager_Update();
 void ConfigManager_reset();
 void ConfigManager_printParams();
 

@@ -1,9 +1,9 @@
 #include <LedManager.h>
 #include "CapteurManager.h"
 #include <ConfigManager.h>
-#include <CapteurManager.h>
 #include <fileManager.h>
 #include <Wire.h>
+#include <clockManager.h>
 
 #define BTN_ROUGE 2
 #define BTN_VERT 3
@@ -80,7 +80,7 @@ void loop() {
 
   if(mode == MODE_CONFIG)
   {
-    ConfigManager_loop();
+    ConfigManager_Update();
     if (retourAutoFlag) {
       retourAutoFlag = false;
       setMode(MODE_STANDARD);
