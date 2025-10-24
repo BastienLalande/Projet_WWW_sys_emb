@@ -1,4 +1,4 @@
-#include <Arduino.h>
+
 #include <LedManager.h>
 #include <CapteurManager.h>
 #include <ConfigManager.h>
@@ -41,10 +41,9 @@ bool rougeHeldDone = false, vertHeldDone = false;
 
 volatile bool retourAutoFlag = false;
 volatile bool aquireDataFlag = false;
-volatile unsigned int secondesEcoulees = 0;
+
 volatile unsigned int secondesData = 0;
 
-const unsigned int TEMPS_RETOUR_AUTO_CONFIG = 1800;
 const unsigned int LOG_INTERVAL = 10;
 
 
@@ -78,10 +77,15 @@ void loop() {
 
   if(mode == MODE_CONFIG)
   {
-    ConfigManager_Update();
+ 
     if (retourAutoFlag) {
       retourAutoFlag = false;
       setMode(MODE_STANDARD);
+    }
+    else 
+    {
+      ConfigManager_Update();
+
     }
 
   }
@@ -133,7 +137,6 @@ void setMode(Mode newMode) {
   secondesEcoulees = 0;
   secondesData = 0;
   const ModeInfo& info = modeInfo[newMode];
-  //ledManager.setColor(info.r, info.g, info.b);
   LedManager_SetModeColor(info.r, info.g, info.b);
 
   Serial.println(info.msg);
@@ -158,7 +161,8 @@ ISR(TIMER1_COMPA_vect) {
   if (mode == MODE_ETEINT) return;
 
   if (mode == MODE_CONFIG) {
-    if (++secondesEcoulees >= TEMPS_RETOUR_AUTO_CONFIG) {
+    //Serial.println(("Timer tick - mode config" + String(secondesEcoulees)));
+    if (++secondesEcoulees >= TEMP_RETOUR_AUTO) {
       secondesEcoulees = 0;
       retourAutoFlag = true;
     }

@@ -59,13 +59,13 @@ SensorData readSensors() {
     return d;
   }
 
-  d.temperature = bme.readTemperature();
-  d.humidity = bme.readHumidity();
-  d.pressure = bme.readPressure() * 0.01F;
-  d.luminosity = analogRead(LUMINOSITY_PIN);
+  if( sensorParams.TEMP_AIR ){  d.temperature = bme.readTemperature();}else{d.temperature=0.0;}
+  if( sensorParams.HYGR ){ d.humidity = bme.readHumidity();}else{d.humidity=0.0;}
+  if( sensorParams.PRESSURE ){ d.pressure = bme.readPressure() * 0.01F;}else{d.pressure =0.0;}
+  if( sensorParams.LUMIN ){ d.luminosity = analogRead(LUMINOSITY_PIN);}else{d.luminosity=0;}
 
   d.tempError = (d.temperature < sensorParams.MIN_TEMP_AIR || d.temperature > sensorParams.MAX_TEMP_AIR);
-  d.hygrError = (d.humidity < sensorParams.HYGR_MINT || d.humidity > sensorParams.HYGR_MAXT);
+  d.hygrError = (d.temperature < sensorParams.HYGR_MINT || d.temperature > sensorParams.HYGR_MAXT);
   d.pressError = (d.pressure < sensorParams.PRESSURE_MIN || d.pressure > sensorParams.PRESSURE_MAX);
   d.luminError = (d.luminosity < sensorParams.LUMIN_LOW || d.luminosity > sensorParams.LUMIN_HIGH);
 

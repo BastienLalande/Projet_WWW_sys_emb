@@ -6,8 +6,8 @@
 
 #define CMD_BUFFER 64
 static char cmdBuffer[CMD_BUFFER];
-static unsigned long lastCommandTime = 0;
-const unsigned long TIMEOUT_INACTIVITE = 30UL * 60UL * 1000UL;
+unsigned int secondesEcoulees = 0;
+unsigned long TEMP_RETOUR_AUTO = 10  /*Secondes*/;
 
 Parametres params;
 
@@ -53,7 +53,7 @@ void ConfigManager_Update() {
       traiterCommande(cmdBuffer);
       Serial.print(F("> "));
       cmdBuffer[0] = '\0';
-      lastCommandTime = millis();
+      secondesEcoulees = 0;
     } else {
       int len = strlen(cmdBuffer);
       if (len < CMD_BUFFER - 1) {
@@ -64,10 +64,7 @@ void ConfigManager_Update() {
     }
   }
 
-  if (millis() - lastCommandTime > TIMEOUT_INACTIVITE) {
-    Serial.println(F("\n[Inactivite] Retour au mode standard..."));
-    while (true);
-  }
+
 }
 
 // --- Commandes serie ---
@@ -162,7 +159,7 @@ static void traiterCommande(char *cmd) {
   else if (!strcasecmp(arg1, "reset")) ConfigManager_reset();
   else if (!strcasecmp(arg1, "version")) Serial.println(F("Version: 1.0"));
   else if (!strcasecmp(arg1, "params")) ConfigManager_printParams();
-  else if (!strcasecmp(arg1, "exit")) Serial.println(F("[INFO] Sortie du mode configuration..."));
+  else if (!strcasecmp(arg1, "exit")) {Serial.println(F("[INFO] Sortie du mode configuration...")); secondesEcoulees = TEMP_RETOUR_AUTO -1; }
   else Serial.println(F("[ERROR] Commande inconnue !"));
 }
 

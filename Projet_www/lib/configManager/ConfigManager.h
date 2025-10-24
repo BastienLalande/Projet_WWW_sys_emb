@@ -27,6 +27,9 @@ typedef struct {
   int PRESSURE_MAX;
 } Parametres;
 
+extern unsigned long TEMP_RETOUR_AUTO ;
+extern unsigned int secondesEcoulees;
+
 // --- Déclaration de la variable globale ---
 extern Parametres configParams;
 
