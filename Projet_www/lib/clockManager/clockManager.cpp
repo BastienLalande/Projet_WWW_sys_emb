@@ -19,7 +19,7 @@ void setupTime(
 
 String getAAMMJJ() {
     clock.getTime();
-    char buffer[6]; // 6 caractères
+    char buffer[6]; // 6 caracteres
     sprintf(buffer, "%02d%02d%02d", clock.year % 100, clock.month, clock.dayOfMonth);
     return String(buffer);
 }

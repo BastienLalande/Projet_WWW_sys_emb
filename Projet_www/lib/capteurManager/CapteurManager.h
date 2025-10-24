@@ -26,7 +26,7 @@ struct SensorParams {
 // --- Déclarations des fonctions ---
 bool init_capteur();
 SensorData readSensors();
-String readGPS();
+bool readGPS(float& lat, float& lon);
 
 // --- Variables globales externes ---
 extern SensorParams sensorParams;

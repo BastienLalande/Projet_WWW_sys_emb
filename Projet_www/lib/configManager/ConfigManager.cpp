@@ -11,7 +11,7 @@ const unsigned long TIMEOUT_INACTIVITE = 30UL * 60UL * 1000UL;
 
 Parametres params;
 
-// --- Valeurs par défaut en mémoire flash ---
+// --- Valeurs par defaut en memoire flash ---
 const Parametres defaultParams PROGMEM = {
   10, //LOG_INTERVAL
   4096, //FILE_MAX_SIZE
@@ -30,7 +30,7 @@ const Parametres defaultParams PROGMEM = {
   1080 //PRESSURE_MAX
 };
 
-// --- Déclarations internes ---
+// --- Declarations internes ---
 static void traiterCommande(char *cmd);
 void ConfigManager_save();
 void ConfigManager_load();
@@ -39,7 +39,7 @@ void ConfigManager_reset();
 // --- Initialisation ---
 void ConfigManager_init() {
   ConfigManager_load();
-  Serial.println(F("[INFO] Mode Configuration initializé"));
+  Serial.println(F("[INFO] Mode Configuration initialize"));
 }
 
 // --- Boucle principale ---
@@ -65,12 +65,12 @@ void ConfigManager_Update() {
   }
 
   if (millis() - lastCommandTime > TIMEOUT_INACTIVITE) {
-    Serial.println(F("\n[Inactivité] Retour au mode standard..."));
+    Serial.println(F("\n[Inactivite] Retour au mode standard..."));
     while (true);
   }
 }
 
-// --- Commandes série ---
+// --- Commandes serie ---
 static void traiterCommande(char *cmd) {
   char *arg1 = strtok(cmd, " ");
   char *arg2 = strtok(NULL, " ");
@@ -123,7 +123,7 @@ static void traiterCommande(char *cmd) {
         atoi(token6)
       );
 
-      Serial.println(F("[INFO] Horloge mise à jour !"));
+      Serial.print(F("[INFO] Horloge mise à jour à :"));
       printTime();
       ok = true;
     }
@@ -131,8 +131,8 @@ static void traiterCommande(char *cmd) {
     if (ok) 
     {
       ConfigManager_save();
-      Serial.println(F("[INFO] Paramètre mis à jour !"));
-    } else Serial.println(F("[ERROR] Paramètre inconnu !"));
+      Serial.println(F("[INFO] Parametre mis à jour !"));
+    } else Serial.println(F("[ERROR] Parametre inconnu !"));
   }
 
   else if (!strcasecmp(arg1, "get")) {
@@ -156,7 +156,7 @@ static void traiterCommande(char *cmd) {
     else if (!strcasecmp(arg2, "PRESSURE")) Serial.println(params.PRESSURE);
     else if (!strcasecmp(arg2, "PRESSURE_MIN")) Serial.println(params.PRESSURE_MIN);
     else if (!strcasecmp(arg2, "PRESSURE_MAX")) Serial.println(params.PRESSURE_MAX);
-    else Serial.println(F("[ERROR] Paramètre inconnu !"));
+    else Serial.println(F("[ERROR] Parametre inconnu !"));
   }
 
   else if (!strcasecmp(arg1, "reset")) ConfigManager_reset();
@@ -166,10 +166,10 @@ static void traiterCommande(char *cmd) {
   else Serial.println(F("[ERROR] Commande inconnue !"));
 }
 
-// --- Fonctions mémoire ---
+// --- Fonctions memoire ---
 void ConfigManager_save() {
   EEPROM.put(0, params);
-  Serial.println(F("[INFO] Paramètres sauvegardés."));
+  Serial.println(F("[INFO] Parametres sauvegardes."));
 }
 
 void ConfigManager_load() {
@@ -179,17 +179,17 @@ void ConfigManager_load() {
     memcpy_P(&params, &defaultParams, sizeof(Parametres));
     ConfigManager_save();
   }
-  Serial.println(F("[INFO] Paramètres chargés depuis EEPROM."));
+  Serial.println(F("[INFO] Parametres charges depuis EEPROM."));
 }
 
 void ConfigManager_reset() {
   memcpy_P(&params, &defaultParams, sizeof(Parametres));
   ConfigManager_save();
-  Serial.println(F("[INFO] Réinitialisation terminée."));
+  Serial.println(F("[INFO] Reinitialisation terminee."));
 }
 
 void ConfigManager_printParams() {
-  Serial.println(F("=== Paramètres actuels ==="));
+  Serial.println(F("=== Parametres actuels ==="));
   Serial.print(F("LOG_INTERVAL: ")); Serial.println(params.LOG_INTERVAL);
   Serial.print(F("LUMIN_LOW: ")); Serial.println(params.LUMIN_LOW);
   Serial.print(F("LUMIN_HIGH: ")); Serial.println(params.LUMIN_HIGH);

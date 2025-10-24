@@ -7,10 +7,10 @@
 static const LedPattern error_patterns[ERROR_COUNT] PROGMEM = {
     {255, 0, 0,   0, 0, 255,     1, 1.0},   // RTC
     {255, 0, 0,   255, 255, 0,   1.0, 1.0}, // GPS
-    {255, 0, 0,   0, 255, 0,     1.0, 1.0}, // Capteur accès
-    {255, 0, 0,   0, 255, 0,     1.0, 2.0}, // Capteur incohérent
+    {255, 0, 0,   0, 255, 0,     1.0, 1.0}, // Capteur acces
+    {255, 0, 0,   0, 255, 0,     1.0, 2.0}, // Capteur incoherent
     {255, 0, 0,   255, 255, 255, 1.0, 1.0}, // SD pleine
-    {255, 0, 0,   255, 255, 255, 1.0, 2.0}  // SD accès
+    {255, 0, 0,   255, 255, 255, 1.0, 2.0}  // SD acces
 };
 
 // === Variables globales ===
@@ -56,9 +56,9 @@ void LedManager_Feedback(ErrorCode error_id) {
     if (error_id >= ERROR_COUNT) return;
 
     if (LedManager_IsBusy()) {
-        Serial.print(F("[INFO] Pattern déjà en cours ("));
+        Serial.print(F("[INFO] Pattern dejà en cours ("));
         Serial.print(current_error);
-        Serial.println(F("), ignoré"));
+        Serial.println(F("), ignore"));
         return;
     }
 
@@ -73,7 +73,7 @@ void LedManager_Feedback(ErrorCode error_id) {
 
     Serial.print(F("[ERROR] Pattern "));
     Serial.print(error_id);
-    Serial.println(F(" activé"));
+    Serial.println(F(" active"));
 }
 
 // === Effacement du pattern ===

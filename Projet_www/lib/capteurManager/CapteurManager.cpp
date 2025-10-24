@@ -41,7 +41,7 @@ bool init_capteur() {
   Wire.begin();
   bmeOK = bme.begin(0x76);
   if (!bmeOK) {
-    Serial.println(F("Erreur : capteur BME280 non détecté !"));
+    Serial.println(F("Erreur : capteur BME280 non detecte !"));
     LedManager_Feedback(ERROR_SENSOR_ACCESS);
     return false;
   }
@@ -75,11 +75,53 @@ SensorData readSensors() {
   return d;
 }
 
-String readGPS() {
+
+float convertToDecimal(String coord, String dir) {
+  float raw = coord.toFloat();
+  int deg = (int)(raw / 100);
+  float min = raw - (deg * 100);
+  float decimal = deg + (min / 60.0);
+  if (dir == F("S") || dir == F("W")) decimal *= -1;
+  return decimal;
+}
+
+bool readGPS(float &lat, float &lon) {
   while (gpsSerial.available()) {
     String line = gpsSerial.readStringUntil('\n');
-    if (line.startsWith("$GPGGA")) return line;
+    //Serial.println(line);
+    
+    if (line.indexOf(F("$GPGGA"))!=-1 || line.indexOf(F("$GPRMC"))!=-1) {
+      if (line.indexOf(F("$GPGGA"))!=-1) line = line.substring(line.indexOf(F("$GPGGA")),line.length());
+      else line = line.substring(line.indexOf(F("$GPRMC")),line.length());
+      // Decouper la trame
+      int index = 0;
+      String fields[15];
+      for (int i = 0; i < 15; i++) {
+        int commaIndex = line.indexOf(',', index);
+        if (commaIndex == -1) break;
+        fields[i] = line.substring(index, commaIndex);
+        index = commaIndex + 1;
+      }
+
+      String latStr = fields[2];
+      String latDir = fields[3];
+      String lonStr = fields[4];
+      String lonDir = fields[5];
+      if (line.indexOf(F("$GPRMC"))!=-1) {
+        latStr = fields[3];
+        latDir = fields[4];
+        lonStr = fields[5];
+        lonDir = fields[6];
+      }
+
+      if (latStr.length() > 0 && lonStr.length() > 0) {
+        lat = convertToDecimal(latStr, latDir);
+        lon = convertToDecimal(lonStr, lonDir);
+        return true; // Succes
+      }
+    }
   }
+
   LedManager_Feedback(ERROR_GPS_ACCESS);
-  return "No GPS data";
+  return false; // echec
 }
