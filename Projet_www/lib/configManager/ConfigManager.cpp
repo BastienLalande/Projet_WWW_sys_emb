@@ -188,8 +188,19 @@ void ConfigManager_reset() {
 void ConfigManager_printParams() {
   Serial.println(F("=== Parametres actuels ==="));
   Serial.print(F("LOG_INTERVAL: ")); Serial.println(params.LOG_INTERVAL);
+  Serial.print(F("FILE_MAX_SIZE: ")); Serial.println(params.FILE_MAX_SIZE);
+  Serial.print(F("TIMEOUT: ")); Serial.println(params.TIMEOUT);
+  Serial.print(F("LUMIN: ")); Serial.println(params.LUMIN);
   Serial.print(F("LUMIN_LOW: ")); Serial.println(params.LUMIN_LOW);
   Serial.print(F("LUMIN_HIGH: ")); Serial.println(params.LUMIN_HIGH);
   Serial.print(F("TEMP_AIR: ")); Serial.println(params.TEMP_AIR);
+  Serial.print(F("MIN_TEMP_AIR: ")); Serial.println(params.MIN_TEMP_AIR);
+  Serial.print(F("MAX_TEMP_AIR: ")); Serial.println(params.MAX_TEMP_AIR);
+  Serial.print(F("HYGR: ")); Serial.println(params.HYGR);
+  Serial.print(F("HYGR_MINT: ")); Serial.println(params.HYGR_MINT);
+  Serial.print(F("HYGR_MAXT: ")); Serial.println(params.HYGR_MAXT);
+  Serial.print(F("PRESSURE: ")); Serial.println(params.PRESSURE);
+  Serial.print(F("PRESSURE_MIN: ")); Serial.println(params.PRESSURE_MIN);
+  Serial.print(F("PRESSURE_MAX: ")); Serial.println(params.PRESSURE_MAX);
   Serial.println(F("=========================="));
 }

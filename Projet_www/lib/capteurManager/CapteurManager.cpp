@@ -2,6 +2,8 @@
 #include <Adafruit_BME280.h>
 #include <SoftwareSerial.h>
 #include <LedManager.h>
+#include <EEPROM.h>
+#include <ConfigManager.h>
 //#include <Wire.h>
 
 #define GPS_RX 7
@@ -14,22 +16,13 @@ Adafruit_BME280 bme;
 
 bool bmeOK = false;
 
-struct SensorParams {
-  bool   TEMP_AIR;
-  int8_t MIN_TEMP_AIR, MAX_TEMP_AIR;
-  bool   HYGR;
-  int8_t HYGR_MINT, HYGR_MAXT;
-  bool   PRESSURE;
-  float  PRESSURE_MIN, PRESSURE_MAX; // en hPa
-  bool   LUMIN;
-  uint16_t LUMIN_LOW, LUMIN_HIGH;
-} sensorParams;
+Parametres configParams;
 
 struct SensorData {
   float  temperature;   // °C
   float  humidity;      // %RH
   float  pressure;      // hPa
-  unsigned int luminosity; // 0..1023
+  int luminosity; // 0..1023
   bool   tempError;
   bool   hygrError;
   bool   pressError;
@@ -102,24 +95,33 @@ bool init_capteur() {
 }
 
 // ------------------ Lecture capteurs ------------------
-SensorData readSensors() {
+SensorData readSensors() 
+{
   SensorData d = {};
   if (!bmeOK) {
     LedManager_Feedback(ERROR_SENSOR_ACCESS);
     return d;
   }
 
-  if( sensorParams.TEMP_AIR ){  d.temperature = bme.readTemperature();}else{d.temperature=0.0;}
-  if( sensorParams.HYGR ){ d.humidity = bme.readHumidity();}else{d.humidity=0.0;}
-  if( sensorParams.PRESSURE ){ d.pressure = bme.readPressure() * 0.01F;}else{d.pressure =0.0;}
-  if( sensorParams.LUMIN ){ d.luminosity = analogRead(LUMINOSITY_PIN);}else{d.luminosity=0;}
+  EEPROM.get(0, configParams);
+  Serial.println(configParams.TEMP_AIR);
+  Serial.println(configParams.HYGR);
+  Serial.println(configParams.PRESSURE);
+  Serial.println(configParams.LUMIN);
 
-  d.tempError = (d.temperature < sensorParams.MIN_TEMP_AIR || d.temperature > sensorParams.MAX_TEMP_AIR);
-  d.hygrError = (d.temperature < sensorParams.HYGR_MINT || d.temperature > sensorParams.HYGR_MAXT);
-  d.pressError = (d.pressure < sensorParams.PRESSURE_MIN || d.pressure > sensorParams.PRESSURE_MAX);
-  d.luminError = (d.luminosity < sensorParams.LUMIN_LOW || d.luminosity > sensorParams.LUMIN_HIGH);
+
+  if( configParams.TEMP_AIR ){  d.temperature = bme.readTemperature();}else{d.temperature=0.0;}
+  if( configParams.HYGR ){ d.humidity = bme.readHumidity();}else{d.humidity=0.0;}
+  if( configParams.PRESSURE ){ d.pressure = bme.readPressure() * 0.01F;}else{d.pressure =215.0;}
+  if( configParams.LUMIN ){ d.luminosity = analogRead(LUMINOSITY_PIN);}else{d.luminosity=0;}
+
+  d.tempError = (d.temperature < configParams.MIN_TEMP_AIR || d.temperature > configParams.MAX_TEMP_AIR);
+  d.hygrError = (d.temperature < configParams.HYGR_MINT || d.temperature > configParams.HYGR_MAXT);
+  d.pressError = (d.pressure < configParams.PRESSURE_MIN || d.pressure > configParams.PRESSURE_MAX);
+  d.luminError = (d.luminosity < configParams.LUMIN_LOW || d.luminosity > configParams.LUMIN_HIGH);
 
   if (d.tempError || d.pressError)
+  { 
     LedManager_Feedback(ERROR_SENSOR_INCOHERENT);
   }
 

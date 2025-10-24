@@ -29,7 +29,7 @@ const ModeInfo modeInfo[] = {
   {0, 0, 0,   "Mode Veille (LED eteinte)"},
   {0, 255, 0, "Mode Standard actif"},
   {255, 255, 0, "Mode Configuration actif (3 min max)"},
-  {255, 165, 0, "Mode Maintenance actif"},
+  {255, 80, 0, "Mode Maintenance actif"},
   {0, 0, 255, "Mode economique actif"}
 };
 
@@ -59,6 +59,7 @@ void setup() {
   LedManager_Init(5,6);
   ConfigManager_init();
   configTimer1();
+  ConfigManager_printParams();
   setMode(MODE_ETEINT);
   init_capteur();
   //init_SD();
