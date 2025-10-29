@@ -189,10 +189,10 @@ void handleDataAcquisition() {
       "| Luminosite :   "+String(data.luminosity)+"\n"+
       "L Pression :     "+String(data.pressure)
     ;
+    Serial.println("Donnees (maintenance): \n" + print_data);
     Serial.print(F("Lat: ")); Serial.print(lat, 6);
     Serial.print(F("  Lon: ")); Serial.println(lon, 6);
-    Serial.println("Donnees (maintenance): \n" + print_data);
-  }else{
+  }else{/*
   Serial.println("saved data");
   char datachar[100];
   char tmpdata[10];
@@ -215,7 +215,17 @@ void handleDataAcquisition() {
   dtostrf(data.pressure, 6, 2, tmpdata);
   strcpy(datachar, "pressure:");
   strcpy(datachar, tmpdata);
+  strcpy(datachar, ";");
 
-  saveData(datachar);
+  dtostrf(lat, 6, 2, tmpdata);
+  strcpy(datachar, "lat:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, "  ");
+  dtostrf(lon, 6, 2, tmpdata);
+  strcpy(datachar, "lon:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, "/n");
+
+  saveData(datachar);*/
   }
 }
