@@ -21,7 +21,7 @@ struct SensorData {
   float  temperature;   // °C
   float  humidity;      // %RH
   float  pressure;      // hPa
-  int luminosity; // 0..1023
+  int    luminosity;    // 0..1023
   bool   tempError;
   bool   hygrError;
   bool   pressError;
@@ -55,11 +55,6 @@ SensorData readSensors()
   }
 
   EEPROM.get(0, configParams);
-  Serial.println(configParams.TEMP_AIR);
-  Serial.println(configParams.HYGR);
-  Serial.println(configParams.PRESSURE);
-  Serial.println(configParams.LUMIN);
-
 
   if( configParams.TEMP_AIR ){  d.temperature = bme.readTemperature();}else{d.temperature=0.0;}
   if( configParams.HYGR ){ d.humidity = bme.readHumidity();}else{d.humidity=0.0;}
@@ -118,13 +113,12 @@ bool readGPS(float &lat, float &lon) {
       }
 
       if (latStr.length() > 0 && lonStr.length() > 0) {
+        if(latStr=="" || lonStr=="") return false;
         lat = convertToDecimal(latStr, latDir);
         lon = convertToDecimal(lonStr, lonDir);
         return true; // Succes
       }
     }
   }
-
-  LedManager_Feedback(ERROR_GPS_ACCESS);
   return false; // echec
 }

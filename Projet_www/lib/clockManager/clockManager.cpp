@@ -17,11 +17,8 @@ void setupTime(
   clock.setTime();
 }
 
-String getAAMMJJ() {
-    clock.getTime();
-    char buffer[6]; // 6 caracteres
-    sprintf(buffer, "%02d%02d%02d", clock.year % 100, clock.month, clock.dayOfMonth);
-    return String(buffer);
+void getAAMMJJ(char *date) {
+  sprintf(date, "%02d%02d%02d", clock.year % 100, clock.month, clock.dayOfMonth);
 }
 
 void printTime() {

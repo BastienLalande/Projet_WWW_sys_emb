@@ -2,9 +2,9 @@
 #include <clockManager.h>
 #include <ConfigManager.h>
 
-#define CHIPSELECT   4
-#define SD_PATH_MAX 4096
-#define IO_BUF_SIZE 64
+#define CHIPSELECT 4
+
+unsigned int maxFileSize = configParams.FILE_MAX_SIZE;
 
 bool init_SD() {
   Serial.print(F("Initializing SD card..."));
@@ -17,84 +17,85 @@ bool init_SD() {
   return true;
 }
 
-
-bool writeFile(const char* path, const uint8_t* data, size_t len) {
-  File f = SD.open(path, FILE_WRITE); // append si existe, sinon cree
-  if (!f) {
-    Serial.println(F("Error opening file for writing"));
-    return false;
-  }
-  size_t written = f.write(data, len);
-  f.close();
-  return (written == len);
-}
-bool writeFile(const char* path, const char* msg) {
-  return writeFile(path, reinterpret_cast<const uint8_t*>(msg), strlen(msg));
+bool saveDataTest(char data[256]){
+  Serial.println("save data test");
 }
 
-void readFile(const char* path) {
-  File f = SD.open(path, FILE_READ);
-  if (!f) {
-    Serial.println(F("Error opening file for reading"));
-    return;
+bool saveData(char data[256]) {
+  char date[7];
+  getAAMMJJ(date);
+  Serial.print("date : ");
+  Serial.println(date);
+  
+  // Nom du fichier : AAMMJJ_0.LOG
+  char name0[20];
+  snprintf(name0, sizeof(name0), "%s_0.LOG", date);
+
+  // Crée le fichier s'il n'existe pas
+  if (!SD.exists(name0)) {
+    File nf = SD.open(name0, FILE_WRITE);
+    if (!nf) return false;
+    nf.close();
   }
-  uint8_t buf[IO_BUF_SIZE];
-  while (true) {
-    int n = f.read(buf, sizeof(buf));
-    if (n <= 0) break;
-    Serial.write(buf, n);
-  }
-  f.close();
-}
 
-void createDirectory(const char* dirName) {
-  if (SD.mkdir(dirName)) {
-    Serial.print(F("Directory created: "));
-    Serial.println(dirName);
-  } else {
-    Serial.print(F("Failed to create directory: "));
-    Serial.println(dirName);
-  }
-}
+  // Vérifie la taille et archive si nécessaire
+  {
+    File f = SD.open(name0, FILE_READ);
+    if (!f) return false;
+    size_t sz = f.size()+256;
+    f.close();
 
-
-void saveData(const char* data) {
-  String dateStr = getAAMMJJ();           // -> ex: "250922"
-  char date[6];
-  dateStr.toCharArray(date, sizeof(date));
-
-  const size_t dataLen = strlen(data);
-
-  char path[SD_PATH_MAX];
-  for (uint8_t i = 0; i < 9; i++) {
-    int n = snprintf(path, sizeof(path), "%s_%u.log", date, (unsigned)i);
-    if (n <= 0 || n >= (int)sizeof(path)) {
-      Serial.println(F("Filename too long, aborting save"));
-      return;
-    }
-
-    uint32_t currentSize = 0;
-    File fr = SD.open(path, FILE_READ);
-    if (fr) {
-      currentSize = fr.size();
-      fr.close();
-    }
-
-    if (currentSize + dataLen <= configParams.FILE_MAX_SIZE) {
-      if (!writeFile(path, (const uint8_t*)data, dataLen)) {
-        Serial.println(F("Write failed"));
+    if (sz >= maxFileSize) {
+      // Cherche la prochaine révision libre
+      int rev = 1;
+      char nameX[20];
+      for (; rev < 1000; ++rev) {
+        snprintf(nameX, sizeof(nameX), "%s_%d.LOG", date, rev);
+        if (!SD.exists(nameX)) break;
       }
-      return;
+      if (rev == 1000) return false; // sécurité
+
+      // Copie _0.LOG -> _n.LOG
+      File src = SD.open(name0, FILE_READ);
+      if (!src) return false;
+      File dst = SD.open(nameX, FILE_WRITE);
+      if (!dst) { src.close(); return false; }
+
+      uint8_t buf[64];
+      while (src.available()) {
+        int n = src.read(buf, sizeof(buf));
+        if (n <= 0) break;
+        if (dst.write(buf, n) != n) { src.close(); dst.close(); return false; }
+      }
+      src.close();
+      dst.close();
+
+      // Réinitialise _0.LOG
+      SD.remove(name0);
+      File nf = SD.open(name0, FILE_WRITE);
+      if (!nf) return false;
+      nf.close();
     }
   }
-  Serial.println(F("aucun fichier n'avait assez d'espace"));
-}
 
-/*
-Exemples d’usage:
-  init_SD(); // necessaire pour utiliser la carte SD
-  writeFile("test.txt", "test ecriture SD\n"); // append si existe, sinon creation
-  readFile("test.txt");
-  createDirectory("logs");
-  saveData("Hello world\n");
-*/
+  // Écrit la ligne dans le fichier courant
+  size_t len = 0;
+  while (len < 256 && data[len] != '\0') ++len;
+
+  File f = SD.open(name0, FILE_WRITE);
+  if (!f) return false;
+
+  bool ok = true;
+  if (f.write((const uint8_t*)data, len) != (int)len) ok = false;
+
+  // Ajoute un saut de ligne si absent
+  if (ok) {
+    char last = (len > 0) ? data[len - 1] : '\0';
+    if (last != '\n' && last != '\r') {
+      if (f.write('\n') != 1) ok = false;
+    }
+  }
+
+  f.close();
+  return ok;
+}
