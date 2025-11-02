@@ -35,13 +35,13 @@ bool init_capteur() {
 
   bmeOK = bme.begin(0x76);
   if (!bmeOK) {
-    Serial.println(F("Erreur : capteur BME280 non detecte !"));
+    Serial.println(F("[ERROR] capteur BME280 non detecte !"));
     LedManager_Feedback(ERROR_SENSOR_ACCESS);
     return false;
   }
 
   pinMode(LUMINOSITY_PIN, INPUT);
-  Serial.println(F("CapteurManager prêt"));
+  Serial.println(F("[INFO] CapteurManager initialisé"));
   return true;
 }
 
@@ -55,11 +55,6 @@ SensorData readSensors()
   }
 
   EEPROM.get(0, configParams);
-  Serial.println(configParams.TEMP_AIR);
-  Serial.println(configParams.HYGR);
-  Serial.println(configParams.PRESSURE);
-  Serial.println(configParams.LUMIN);
-
 
   if( configParams.TEMP_AIR ){  d.temperature = bme.readTemperature();}else{d.temperature=0.0;}
   if( configParams.HYGR ){ d.humidity = bme.readHumidity();}else{d.humidity=0.0;}

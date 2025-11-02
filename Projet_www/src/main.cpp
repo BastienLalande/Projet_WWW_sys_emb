@@ -10,6 +10,8 @@
 #define BTN_ROUGE 2
 #define BTN_VERT 3
 
+#define USE_SD 1
+
 
 enum Mode : uint8_t {
   MODE_ETEINT,
@@ -26,11 +28,11 @@ struct ModeInfo {
 };
 
 const ModeInfo modeInfo[] = {
-  {0, 0, 0,   "Mode Veille (LED eteinte)"},
-  {0, 255, 0, "Mode Standard actif"},
-  {255, 255, 0, "Mode Configuration actif (3 min max)"},
-  {255, 80, 0, "Mode Maintenance actif"},
-  {0, 0, 255, "Mode economique actif"}
+  {0, 0, 0,   "[INFO] Mode Veille (LED eteinte)"},
+  {0, 255, 0, "[INFO] Mode Standard actif"},
+  {255, 255, 0, "[INFO] Mode Configuration actif (3 min max)"},
+  {255, 80, 0, "[INFO] Mode Maintenance actif"},
+  {0, 0, 255, "[INFO] Mode economique actif"}
 };
 
 
@@ -61,9 +63,9 @@ void setup() {
   configTimer1();
   ConfigManager_printParams();
   setMode(MODE_ETEINT);
-  init_capteur();
-  //init_SD();
-  Serial.println(F("Systeme en veille - attendre appui bouton"));
+  Serial.println(F("[INFO] Systeme en veille - attendre appui bouton"));
+
+
 }
 
 void loop() {
@@ -144,8 +146,10 @@ void setMode(Mode newMode) {
 }
 
 void initPins() {
+
   pinMode(BTN_ROUGE, INPUT_PULLUP);
   pinMode(BTN_VERT, INPUT_PULLUP);
+  Serial.println(F("[INFO] Pins initialisés"));
 }
 
 void configTimer1() {
@@ -192,9 +196,12 @@ void handleDataAcquisition() {
     Serial.print(F("Lat: ")); Serial.print(lat, 6);
     Serial.print(F("  Lon: ")); Serial.println(lon, 6);
     Serial.println("Donnees (maintenance): \n" + print_data);
-  }else{
+  }
+  else
+  {
   
   Serial.println("Donnees enregistrees:");
+  saveData("data");
 
   
   

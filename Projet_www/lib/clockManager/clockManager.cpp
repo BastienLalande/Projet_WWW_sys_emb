@@ -3,7 +3,7 @@
 
 DS1307 clock;
 
-void init_clock(){clock.begin();}
+void init_clock(){clock.begin();Serial.println(F("[INFO] ClockManager initialisé"));}
 
 void setupTime(
     uint16_t _year, 

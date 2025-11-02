@@ -7,7 +7,7 @@
 #define CMD_BUFFER 64
 static char cmdBuffer[CMD_BUFFER];
 unsigned int secondesEcoulees = 0;
-unsigned long TEMP_RETOUR_AUTO = 10  /*Secondes*/;
+unsigned long TEMP_RETOUR_AUTO = 60  /*Secondes*/;
 
 Parametres params;
 
@@ -39,7 +39,7 @@ void ConfigManager_reset();
 // --- Initialisation ---
 void ConfigManager_init() {
   ConfigManager_load();
-  Serial.println(F("[INFO] Mode Configuration initialize"));
+  Serial.println(F("[INFO] ConfigManager initialisé"));
 }
 
 // --- Boucle principale ---
@@ -159,7 +159,12 @@ static void traiterCommande(char *cmd) {
   else if (!strcasecmp(arg1, "reset")) ConfigManager_reset();
   else if (!strcasecmp(arg1, "version")) Serial.println(F("Version: 1.0"));
   else if (!strcasecmp(arg1, "params")) ConfigManager_printParams();
-  else if (!strcasecmp(arg1, "exit")) {Serial.println(F("[INFO] Sortie du mode configuration...")); secondesEcoulees = TEMP_RETOUR_AUTO -1; }
+  else if (!strcasecmp(arg1, "exit")) {
+
+    secondesEcoulees = TEMP_RETOUR_AUTO - (TEMP_RETOUR_AUTO -5); 
+    Serial.print(F("[INFO] Sortie du mode configuration...")); 
+    Serial.println("Temps restant : ");  
+  }
   else Serial.println(F("[ERROR] Commande inconnue !"));
 }
 

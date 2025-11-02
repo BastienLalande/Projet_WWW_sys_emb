@@ -7,13 +7,11 @@
 #define IO_BUF_SIZE 64
 
 bool init_SD() {
-  Serial.print(F("Initializing SD card..."));
   if (!SD.begin(CHIPSELECT)) {
-    Serial.println(F(" failed"));
-    Serial.println(F("Check: card inserted, wiring, chipSelect pin."));
+    Serial.println(F("[ERROR] Check: card inserted, wiring, chipSelect pin."));
     return false;
   }
-  Serial.println(F(" done."));
+  Serial.println(F("[INFO] FileManager initialisé"));
   return true;
 }
 
@@ -21,7 +19,7 @@ bool init_SD() {
 bool writeFile(const char* path, const uint8_t* data, size_t len) {
   File f = SD.open(path, FILE_WRITE); // append si existe, sinon cree
   if (!f) {
-    Serial.println(F("Error opening file for writing"));
+    Serial.println(F("[ERROR] Error opening file for writing"));
     return false;
   }
   size_t written = f.write(data, len);
@@ -35,7 +33,7 @@ bool writeFile(const char* path, const char* msg) {
 void readFile(const char* path) {
   File f = SD.open(path, FILE_READ);
   if (!f) {
-    Serial.println(F("Error opening file for reading"));
+    Serial.println(F("[ERROR] Error opening file for reading"));
     return;
   }
   uint8_t buf[IO_BUF_SIZE];
@@ -49,10 +47,10 @@ void readFile(const char* path) {
 
 void createDirectory(const char* dirName) {
   if (SD.mkdir(dirName)) {
-    Serial.print(F("Directory created: "));
+    Serial.print(F("[INFO] Directory created: "));
     Serial.println(dirName);
   } else {
-    Serial.print(F("Failed to create directory: "));
+    Serial.print(F("[ERROR] Failed to create directory: "));
     Serial.println(dirName);
   }
 }
@@ -60,7 +58,7 @@ void createDirectory(const char* dirName) {
 
 void saveData(const char* data) {
   String dateStr = getAAMMJJ();           // -> ex: "250922"
-  char date[6];
+  char date[8];
   dateStr.toCharArray(date, sizeof(date));
 
   const size_t dataLen = strlen(data);
@@ -69,7 +67,7 @@ void saveData(const char* data) {
   for (uint8_t i = 0; i < 9; i++) {
     int n = snprintf(path, sizeof(path), "%s_%u.log", date, (unsigned)i);
     if (n <= 0 || n >= (int)sizeof(path)) {
-      Serial.println(F("Filename too long, aborting save"));
+      Serial.println(F("[ERROR] Filename too long, aborting save"));
       return;
     }
 
@@ -82,12 +80,12 @@ void saveData(const char* data) {
 
     if (currentSize + dataLen <= configParams.FILE_MAX_SIZE) {
       if (!writeFile(path, (const uint8_t*)data, dataLen)) {
-        Serial.println(F("Write failed"));
+        Serial.println(F("[ERROR] Write failed"));
       }
       return;
     }
   }
-  Serial.println(F("aucun fichier n'avait assez d'espace"));
+  Serial.println(F("[ERROR] Aucun fichier n'avait assez d'espace"));
 }
 
 /*

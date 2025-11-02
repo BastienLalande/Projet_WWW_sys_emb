@@ -37,6 +37,7 @@ void LedManager_Init(uint8_t dataPin, uint8_t clockPin, uint8_t ledCount) {
     if (led) delete led;
     led = new ChainableLED(dataPin, clockPin, ledCount);
     LedManager_SetColor(0, 0, 0);
+    Serial.println(F("[INFO] LedManager initialisé"));
 }
 
 // === Mode couleur ===
