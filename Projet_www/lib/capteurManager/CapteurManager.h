@@ -8,7 +8,7 @@ struct SensorData {
   float temperature;
   float humidity;
   float pressure;
-  unsigned int luminosity;
+  int luminosity;
   bool tempError;
   bool hygrError;
   bool pressError;

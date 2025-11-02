@@ -13,7 +13,7 @@ void setupTime(
     uint8_t _minute, 
     uint8_t _second);
 
-String getAAMMJJ();
+void getAAMMJJ(char *date);
 
 void printTime();
 

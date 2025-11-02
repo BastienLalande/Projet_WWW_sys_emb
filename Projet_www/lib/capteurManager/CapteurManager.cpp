@@ -4,6 +4,7 @@
 #include <LedManager.h>
 #include <EEPROM.h>
 #include <ConfigManager.h>
+#include <TinyGPSPlus.h>
 
 #define GPS_RX 7
 #define GPS_TX 8
@@ -11,6 +12,7 @@
 
 // --- Objets globaux ---
 SoftwareSerial gpsSerial(GPS_RX, GPS_TX);
+TinyGPSPlus gps;
 Adafruit_BME280 bme;
 
 bool bmeOK = false;
@@ -21,7 +23,7 @@ struct SensorData {
   float  temperature;   // °C
   float  humidity;      // %RH
   float  pressure;      // hPa
-  int luminosity; // 0..1023
+  int    luminosity;    // 0..1023
   bool   tempError;
   bool   hygrError;
   bool   pressError;
@@ -30,7 +32,7 @@ struct SensorData {
 
 // ------------------ Initialisation ------------------
 bool init_capteur() {
-  gpsSerial.begin(9600);  // 1 seule fois
+  gpsSerial.begin(9600);
   Wire.begin();
 
   bmeOK = bme.begin(0x76);
@@ -83,43 +85,18 @@ float convertToDecimal(String coord, String dir) {
   return decimal;
 }
 
-bool readGPS(float &lat, float &lon) {
-  while (gpsSerial.available()) {
-    String line = gpsSerial.readStringUntil('\n');
-    //Serial.println(line);
-    
-    if (line.indexOf(F("$GPGGA"))!=-1 || line.indexOf(F("$GPRMC"))!=-1) {
-      if (line.indexOf(F("$GPGGA"))!=-1) line = line.substring(line.indexOf(F("$GPGGA")),line.length());
-      else line = line.substring(line.indexOf(F("$GPRMC")),line.length());
-      // Decouper la trame
-      int index = 0;
-      String fields[15];
-      for (int i = 0; i < 15; i++) {
-        int commaIndex = line.indexOf(',', index);
-        if (commaIndex == -1) break;
-        fields[i] = line.substring(index, commaIndex);
-        index = commaIndex + 1;
-      }
-
-      String latStr = fields[2];
-      String latDir = fields[3];
-      String lonStr = fields[4];
-      String lonDir = fields[5];
-      if (line.indexOf(F("$GPRMC"))!=-1) {
-        latStr = fields[3];
-        latDir = fields[4];
-        lonStr = fields[5];
-        lonDir = fields[6];
-      }
-
-      if (latStr.length() > 0 && lonStr.length() > 0) {
-        lat = convertToDecimal(latStr, latDir);
-        lon = convertToDecimal(lonStr, lonDir);
-        return true; // Succes
-      }
-    }
+bool readGPS(float &lat, float &lon)
+{
+  while (gpsSerial.available())
+  {
+    char c = gpsSerial.read();
+    gps.encode(c);
   }
-
-  LedManager_Feedback(ERROR_GPS_ACCESS);
-  return false; // echec
+  if (gps.location.isValid())
+  {
+    lat = gps.location.lat();
+    lon = gps.location.lng();
+    return true;
+  }
+  return false;
 }

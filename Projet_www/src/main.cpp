@@ -193,20 +193,43 @@ void handleDataAcquisition() {
       "| Luminosite :   "+String(data.luminosity)+"\n"+
       "L Pression :     "+String(data.pressure)
     ;
+    Serial.println("Donnees (maintenance): \n" + print_data);
     Serial.print(F("Lat: ")); Serial.print(lat, 6);
     Serial.print(F("  Lon: ")); Serial.println(lon, 6);
-    Serial.println("Donnees (maintenance): \n" + print_data);
-  }
-  else
-  {
-  
-  Serial.println("Donnees enregistrees:");
-  saveData("data");
+  }else{/*
+  Serial.println("saved data");
+  char datachar[100];
+  char tmpdata[10];
 
-  
-  
+  dtostrf(data.temperature, 6, 2, tmpdata);
+  strcpy(datachar, "temperature:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, ";");
 
-  //readFile("test.log");
+  dtostrf(data.humidity, 6, 2, tmpdata);
+  strcpy(datachar, "humidity:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, ";");
 
+  itoa(data.luminosity, tmpdata, 10);
+  strcpy(datachar, "luminosity:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, ";");
+
+  dtostrf(data.pressure, 6, 2, tmpdata);
+  strcpy(datachar, "pressure:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, ";");
+
+  dtostrf(lat, 6, 2, tmpdata);
+  strcpy(datachar, "lat:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, "  ");
+  dtostrf(lon, 6, 2, tmpdata);
+  strcpy(datachar, "lon:");
+  strcpy(datachar, tmpdata);
+  strcpy(datachar, "/n");
+
+  saveData(datachar);*/
   }
 }
