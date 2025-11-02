@@ -183,7 +183,7 @@ ISR(TIMER1_COMPA_vect) {
       retourAutoFlag = true;
     }
   } else {
-    unsigned int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) ? LOG_INTERVAL * 2 : LOG_INTERVAL;
+    unsigned int wait_value = (mode == MODE_ECO || (mode == MODE_MAINTENANCE && previousMode == MODE_ECO)) ? LOG_INTERVAL * 4 : LOG_INTERVAL;
     if (++secondesData >= wait_value) {
       secondesData = 0;
       aquireDataFlag = true;
@@ -200,13 +200,11 @@ void handleDataAcquisition() {
   readGPS(lat, lon);
 
   if (mode == MODE_MAINTENANCE){
-    String print_data = 
-      "| Temperature :  "+String(data.temperature)+"\n"+
-      "| Humidite :     "+String(data.humidity)+"\n"+
-      "| Luminosite :   "+String(data.luminosity)+"\n"+
-      "L Pression :     "+String(data.pressure)
-    ;
-    Serial.println("[INFO] Donnees (maintenance): \n" + print_data);
+    Serial.println("[INFO] Donnees (maintenance): " );
+    Serial.println("| Temperature :  "+String(data.temperature));
+    Serial.println("| Humidite :     "+String(data.humidity));
+    Serial.println("| Luminosite :   "+String(data.luminosity));
+    Serial.println("| Pression :     "+String(data.pressure));
     Serial.print(F("Lat: ")); Serial.print(lat, 6);
     Serial.print(F("  Lon: ")); Serial.println(lon, 6);
   }
