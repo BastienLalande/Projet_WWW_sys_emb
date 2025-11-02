@@ -15,10 +15,6 @@ bool init_SD() {
   return true;
 }
 
-bool saveDataTest(char data[256]){
-  Serial.println("save data test");
-}
-
 bool saveData(char data[256]) {
   char date[7];
   getAAMMJJ(date);

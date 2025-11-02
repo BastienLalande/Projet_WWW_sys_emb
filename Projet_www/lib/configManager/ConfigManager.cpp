@@ -159,11 +159,9 @@ static void traiterCommande(char *cmd) {
   else if (!strcasecmp(arg1, "reset")) ConfigManager_reset();
   else if (!strcasecmp(arg1, "version")) Serial.println(F("Version: 1.0"));
   else if (!strcasecmp(arg1, "params")) ConfigManager_printParams();
-  else if (!strcasecmp(arg1, "exit")) {
-
-    secondesEcoulees = TEMP_RETOUR_AUTO - (TEMP_RETOUR_AUTO -5); 
-    Serial.print(F("[INFO] Sortie du mode configuration...")); 
-    Serial.println("Temps restant : ");  
+    else if (!strcasecmp(arg1, "exit")) {
+    retourAutoFlag = true;
+    Serial.println(F("[INFO] Sortie immédiate du mode configuration..."));
   }
   else Serial.println(F("[ERROR] Commande inconnue !"));
 }

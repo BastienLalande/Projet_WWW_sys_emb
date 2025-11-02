@@ -10,6 +10,7 @@
 #define BTN_ROUGE 2
 #define BTN_VERT 3
 
+//Permet d'utiliser les capteurs ou la SD sans faire deborder la RAM
 #define USE_SD 0
 
 
@@ -42,6 +43,7 @@ unsigned long timerRougeStart = 0, timerVertStart = 0;
 bool rougeHeldDone = false, vertHeldDone = false;
 
 volatile bool retourAutoFlag = false;
+
 volatile bool aquireDataFlag = false;
 
 volatile unsigned int secondesData = 0;
@@ -216,6 +218,7 @@ void handleDataAcquisition() {
 
   SensorData data;
 
+  // Valeurs arbitraires pour simuler une aquisition de donnée
   data.temperature = 25.0;
   data.humidity = 50.0;
   data.pressure = 1013.25;

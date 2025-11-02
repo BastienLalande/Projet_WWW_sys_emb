@@ -29,6 +29,8 @@ typedef struct {
 
 extern unsigned long TEMP_RETOUR_AUTO ;
 extern unsigned int secondesEcoulees;
+extern volatile bool retourAutoFlag;
+
 
 // --- Déclaration de la variable globale ---
 extern Parametres configParams;
@@ -40,5 +42,7 @@ void ConfigManager_save();
 void ConfigManager_Update();
 void ConfigManager_reset();
 void ConfigManager_printParams();
+
+
 
 #endif // CONFIG_MANAGER_H
